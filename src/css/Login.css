@@ -1,0 +1,139 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    /*background: url('../assets/welcomeBackgroundWeb.png') no-repeat center center fixed;*/
+    background-color: #F0F0F0;
+    background-size: cover;
+    overflow: hidden;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-box {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    width: 800px;
+}
+
+.fixed-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.illustration {
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-image: url('../assets/welcomeBackground.png');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat;
+}
+
+/*
+.illustration-img {
+    max-width: 100%;
+    height: auto;
+}*/
+
+.form-container {
+    width: 60%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.title {
+    font-size: 45px;
+    font-weight: bold;
+    color: #FFFFFF;
+    margin-bottom: 1px;
+    text-align: left;
+}
+
+.title2 {
+    font-size: 38px;
+    font-weight: bold;
+    color: #133E87;
+    margin-bottom: 1px;
+    text-align: left;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #FFFFFF;
+    font-weight: bold;
+    margin-top: 0;
+    text-align: left;
+}
+
+.description {
+    color: #608BC1;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: justify;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    color: #133E87;
+    margin-bottom: 5px;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+}
+
+.links {
+    display: flex;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.links a {
+    color: #133E87;
+    text-decoration: none;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.login-button {
+    width: 106%;
+    padding: 10px;
+    background: #133E87;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.login-button:hover {
+    background: #608BC1;
+}
