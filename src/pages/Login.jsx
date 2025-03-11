@@ -7,7 +7,7 @@ const Login = () => {
         <div className="login-box fixed-box">
             {/* Lado izquierdo */}
             <div className="illustration">
-                {/*<img src="../src/assets/login.png" alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />*/}
+                {/* <img src="../src/assets/login.png" alt="Imagen de Asset Tracker UTEZ" className="illustration-img" /> */}
                 <h1 className="title">AssetTracker</h1>
                 <h2 className="subtitle">UTEZ</h2>
             </div>
