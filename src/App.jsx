@@ -1,34 +1,29 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import Sidebar from "./components/Sidebar"
-import Home from "./pages/Home"
-import GestionInventarios from "./pages/GestionInventarios"
-import CategoriasEspacios from "./pages/CategoriasEspacios"
-import CategoriaRecursos from "./pages/CategoriaRecursos"
-import Responsables from "./pages/Responsables"
-import Usuarios from "./pages/Usuarios"
-import NuevasCuentas from "./pages/NuevasCuentas"
-import "./App.css"
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
+import RoutesConfig from "./route/RoutesConfig";  // Importa las rutas desde el archivo separado
+import "./App.css";
 
 function App() {
+  const location = useLocation();  // Ahora está dentro de un contexto de Router
+
+  // Las rutas donde no queremos mostrar el Sidebar
+  const noSidebarRoutes = ["/login", "/404"];
+
+  // Verifica si la ruta actual no debe mostrar el Sidebar
+  const shouldShowSidebar = !noSidebarRoutes.includes(location.pathname);
+
   return (
-    <Router>
-      <div className="app-container">
-        <Sidebar />
-        <main className="content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/gestion-inventarios" element={<GestionInventarios />} />
-            <Route path="/categorias-espacios" element={<CategoriasEspacios />} />
-            <Route path="/categoria-recursos" element={<CategoriaRecursos />} />
-            <Route path="/responsables" element={<Responsables />} />
-            <Route path="/usuarios" element={<Usuarios />} />
-            <Route path="/nuevas-cuentas" element={<NuevasCuentas />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
-  )
+    <div className="app-container">
+      {shouldShowSidebar && <Sidebar />} {/* Muestra el Sidebar solo si la ruta no está en la lista */}
+      <main className="content">
+        <Routes>
+          {RoutesConfig.map((route, index) => (
+            <Route key={index} path={route.path} element={route.element} />
+          ))}
+        </Routes>
+      </main>
+    </div>
+  );
 }
 
-export default App
-
+export default App;
