@@ -31,9 +31,8 @@ import {
   Edit,
   Trash2,
   BarChart3,
-  PieChart as LucidePieChart,
+  PieChart,
 } from "lucide-react"
-
 import {
   BarChart,
   Bar,
@@ -132,7 +131,7 @@ const resourceTypeData = [
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"]
 
-const Home = () => {
+const Dashboard = () => {
   const [tabValue, setTabValue] = useState(0)
   const theme = useTheme()
 
@@ -155,7 +154,7 @@ const Home = () => {
         <Grid item xs={12}>
           <Paper sx={{ p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <Typography variant="h4" component="h1">
-              ASSET TRACKER UTEZ
+              Dashboard de Gestión de Activos
             </Typography>
             <Box>
               <Button variant="contained" startIcon={<Plus size={18} />} sx={{ mr: 1 }}>
@@ -222,7 +221,7 @@ const Home = () => {
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, height: "100%" }}>
             <Typography variant="h6" gutterBottom display="flex" alignItems="center">
-              <LucidePieChart size={20} style={{ marginRight: "8px" }} />
+              <PieChart size={20} style={{ marginRight: "8px" }} />
               Recursos por Categoría
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
@@ -475,4 +474,5 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Dashboard
+

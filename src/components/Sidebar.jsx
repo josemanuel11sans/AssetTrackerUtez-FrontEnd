@@ -1,23 +1,33 @@
-"use client"
+"use client";
 
 // Importa los hooks y componentes necesarios de React Router y Lucide React
-import { useState } from "react" // Añadir useState para manejar el estado de colapso
-import { useLocation, Link } from "react-router-dom"
-import { Home, ClipboardList, Layers, Database, Users, User, FileText, LogOut, ChevronLeft } from "lucide-react"
-import SidebarItem from "./SidebarItem" // Importa el componente SidebarItem
-import "../styles/Sidebar.css" // Importa los estilos CSS para la barra lateral
-import LogoComponent from "./LogoComponent" // Importa el componente de logo
+import { useState } from "react"; // Añadir useState para manejar el estado de colapso
+import { useLocation, Link } from "react-router-dom";
+import {
+  Home,
+  ClipboardList,
+  Layers,
+  Database,
+  Users,
+  User,
+  FileText,
+  LogOut,
+  ChevronLeft,
+} from "lucide-react";
+import SidebarItem from "./SidebarItem"; // Importa el componente SidebarItem
+import "../styles/Sidebar.css"; // Importa los estilos CSS para la barra lateral
+import LogoComponent from "./LogoComponent"; // Importa el componente de logo
 
 // Define el componente Sidebar
 const Sidebar = () => {
-  const location = useLocation() // Obtiene la ubicación actual de la ruta
-  const currentPath = location.pathname // Obtiene el path actual
-  const [collapsed, setCollapsed] = useState(false) // Estado para controlar si el sidebar está colapsado
+  const location = useLocation(); // Obtiene la ubicación actual de la ruta
+  const currentPath = location.pathname; // Obtiene el path actual
+  const [collapsed, setCollapsed] = useState(false); // Estado para controlar si el sidebar está colapsado
 
   // Función para alternar el estado de colapso
   const toggleSidebar = () => {
-    setCollapsed(!collapsed)
-  }
+    setCollapsed(!collapsed);
+  };
 
   return (
     <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
@@ -47,7 +57,8 @@ const Sidebar = () => {
       <div className="sidebar-section">
         {" "}
         {/* Sección de inventarios */}
-        <h2 className="section-title">Inventarios</h2> {/* Título de la sección */}
+        <h2 className="section-title">Inventarios</h2>{" "}
+        {/* Título de la sección */}
         <nav className="nav-menu">
           {" "}
           {/* Menú de navegación */}
@@ -121,16 +132,19 @@ const Sidebar = () => {
       <div className="sidebar-footer">
         {" "}
         {/* Pie de página de la barra lateral */}
-        <Link to="/login" className={`logout-button ${collapsed ? "collapsed" : ""}`}>
+        <Link
+          to="/login"
+          className={`logout-button ${collapsed ? "collapsed" : ""}`}
+        >
           {" "}
           {/* Botón de cierre de sesión */}
           <LogOut size={20} /> {/* Ícono de cierre de sesión */}
-          {!collapsed && <span>Salir</span>} {/* Texto del botón, oculto cuando está colapsado */}
+          {!collapsed && <span>Salir</span>}{" "}
+          {/* Texto del botón, oculto cuando está colapsado */}
         </Link>
       </div>
     </aside>
-  )
-}
+  );
+};
 
-export default Sidebar // Exporta el componente Sidebar
-
+export default Sidebar; // Exporta el componente Sidebar
