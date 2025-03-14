@@ -47,6 +47,10 @@ import {
   Pie,
   Cell,
 } from "recharts"
+import Grafico from "../components/dashboard/Grafico"
+import Pastel from "../components/dashboard/Pastel"
+import Estadisticas from "../components/dashboard/Estadisticas"
+import HeaderDashboard from "../components/dashboard/HeaderDashboard"
 
 // Datos de ejemplo para el dashboard
 const buildingsData = [
@@ -115,22 +119,6 @@ const inventoryData = [
   { id: 3, fecha: "2023-07-10", edificio: "Edificio C", espacio: "Oficina 301", numRecursos: 5, estado: "Completado" },
 ]
 
-// Datos para gráficos
-const buildingChartData = [
-  { name: "Edificio A", espacios: 15 },
-  { name: "Edificio B", espacios: 10 },
-  { name: "Edificio C", espacios: 20 },
-  { name: "Edificio D", espacios: 5 },
-]
-
-const resourceTypeData = [
-  { name: "Equipo de cómputo", value: 45 },
-  { name: "Mobiliario", value: 30 },
-  { name: "Equipo audiovisual", value: 15 },
-  { name: "Equipo de oficina", value: 10 },
-]
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"]
 
 const Home = () => {
   const [tabValue, setTabValue] = useState(0)
@@ -139,6 +127,8 @@ const Home = () => {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue)
   }
+
+
 
   // Estadísticas generales
   const stats = [
@@ -152,23 +142,9 @@ const Home = () => {
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Grid container spacing={3}>
         {/* Encabezado */}
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography variant="h4" component="h1">
-              ASSET TRACKER UTEZ
-            </Typography>
-            <Box>
-              <Button variant="contained" startIcon={<Plus size={18} />} sx={{ mr: 1 }}>
-                Nuevo Inventario
-              </Button>
-              <Button variant="outlined" startIcon={<Search size={18} />}>
-                Buscar
-              </Button>
-            </Box>
-          </Paper>
-        </Grid>
-
+        <HeaderDashboard />
         {/* Tarjetas de estadísticas */}
+        {/* <Estadisticas /> */}
         {stats.map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Card>
@@ -199,53 +175,10 @@ const Home = () => {
           </Grid>
         ))}
 
-        {/* Gráficos */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom display="flex" alignItems="center">
-              <BarChart3 size={20} style={{ marginRight: "8px" }} />
-              Espacios por Edificio
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={buildingChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="espacios" fill={theme.palette.primary.main} />
-              </BarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, height: "100%" }}>
-            <Typography variant="h6" gutterBottom display="flex" alignItems="center">
-              <LucidePieChart size={20} style={{ marginRight: "8px" }} />
-              Recursos por Categoría
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <RePieChart>
-                <Pie
-                  data={resourceTypeData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {resourceTypeData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RePieChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
+        {/* Grafico de barras */}
+        <Grafico />
+        {/* Gráfico de pastel */}
+        <Pastel />
 
         {/* Pestañas para diferentes módulos */}
         <Grid item xs={12}>
@@ -268,7 +201,22 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Edificios</Typography>
-                  <Button variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  {/* mr: 1,
+              backgroundColor: "#133e87",
+              borderRadius: "20px",
+              color: "#fff",
+              padding: "8px 20px", */}
+                  <Button style={{
+                    mr: 1,
+                    backgroundColor: "#133e87",
+                    borderRadius: "20px",
+                    color: "#fff",
+                    padding: "8px 20px",
+                    "&:hover": {
+                      backgroundColor: "#fff",
+                      color: "#133e87",
+                    },
+                  }}  variant="contained" size="small" startIcon={<Plus size={16}  />}>
                     Nuevo Edificio
                   </Button>
                 </Box>
@@ -317,7 +265,17 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Espacios</Typography>
-                  <Button variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  <Button style={{
+                    mr: 1,
+                    backgroundColor: "#133e87",
+                    borderRadius: "20px",
+                    color: "#fff",
+                    padding: "8px 20px",
+                    "&:hover": {
+                      backgroundColor: "#fff",
+                      color: "#133e87",
+                    },
+                  }} variant="contained" size="small" startIcon={<Plus size={16} />}>
                     Nuevo Espacio
                   </Button>
                 </Box>
@@ -368,7 +326,17 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Recursos</Typography>
-                  <Button variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  <Button style={{
+                    mr: 1,
+                    backgroundColor: "#133e87",
+                    borderRadius: "20px",
+                    color: "#fff",
+                    padding: "8px 20px",
+                    "&:hover": {
+                      backgroundColor: "#fff",
+                      color: "#133e87",
+                    },
+                  }} variant="contained" size="small" startIcon={<Plus size={16} />}>
                     Nuevo Recurso
                   </Button>
                 </Box>
@@ -423,7 +391,17 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Inventarios</Typography>
-                  <Button variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  <Button style={{
+                    mr: 1,
+                    backgroundColor: "#133e87",
+                    borderRadius: "20px",
+                    color: "#fff",
+                    padding: "8px 20px",
+                    "&:hover": {
+                      backgroundColor: "#fff",
+                      color: "#133e87",
+                    },
+                  }} variant="contained" size="small" startIcon={<Plus size={16} />}>
                     Nuevo Inventario
                   </Button>
                 </Box>

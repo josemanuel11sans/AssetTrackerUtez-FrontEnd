@@ -182,7 +182,7 @@ const CategoriaRecursos = () => {
           Agregar categoría
         </Button>
       </div>
-      <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
+      {/* <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
         <TableContainer
           component={Paper}
           sx={{
@@ -330,7 +330,114 @@ const CategoriaRecursos = () => {
             />
           </DialogContent>
         </Dialog>
-      </div>
+      </div> */}
+    <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: 2,
+          boxShadow: 3,
+          overflowX: "auto",
+          width: "100%",
+        }}
+      >
+        <Table size="small">
+          <TableHead>
+            <TableRow
+              sx={{
+                backgroundColor: "#133e87", // Color de fondo de los encabezados
+                zIndex: 1,
+              }}
+            >
+              {["ID", "Nombre", "Material", "Imagen", "Status", "Acciones"].map((header) => (
+                <TableCell
+                  key={header}
+                  sx={{
+                    color: "white",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    padding: "12px 16px",
+                  }}
+                >
+                  {header}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredCategorias
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((categoria) => (
+                <TableRow
+                  key={categoria.id}
+                  sx={{
+                    "&:hover": { backgroundColor: "#f5f5f5" },
+                    transition: "background-color 0.3s",
+                  }}
+                >
+                  <TableCell sx={{ textAlign: "center" }}>{categoria.id}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{categoria.nombre}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{categoria.material}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <img
+                      src={categoria.imagenUrl}
+                      alt={categoria.nombre}
+                      width="40"
+                      style={{ borderRadius: "5px", cursor: "pointer" }}
+                      onClick={() => handleClickOpen(categoria.imagenUrl)}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        borderRadius: "50%",
+                        backgroundColor: categoria.status ? "green" : "red",
+                        display: "inline-block",
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <IconButton
+                      sx={{
+                        backgroundColor: "#133E87",
+                        color: "white",
+                        borderRadius: "50%",
+                        padding: "6px",
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          component="div"
+          count={filteredCategorias.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+      </TableContainer>
+
+      {/* Modal de Imagen */}
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle>Imagen de la categoría</DialogTitle>
+        <DialogContent>
+          <img
+            src={selectedImage}
+            alt="Imagen seleccionada"
+            style={{ width: "100%" }}
+          />
+        </DialogContent>
+      </Dialog>
+    </div>
+
     </>
   );
 };
