@@ -1,0 +1,101 @@
+.not-found-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: white;
+    overflow: auto;
+    perspective: 1000px;
+  }
+  .not-found-content {
+    text-align: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 1rem;
+    transition: transform 0.1s ease-out;
+    max-width: 90%;
+    width: 500px;
+  }
+  .error-code {
+    font-size: 8rem;
+    font-weight: 900;
+    margin: 0;
+    background-color: #0d47a1;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    position: relative;
+  }
+  .error-code::after {
+    content: "404";
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+    background-color: #333;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.3;
+    transform: translate(150px, 10px);
+  }
+  .error-line {
+    height: 4px;
+    width: 300px;
+    background-color: #0d47a1;
+    margin: 1.5rem auto;
+    border-radius: 2px;
+  }
+  
+  .error-message {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: #333;
+  }
+  
+  .error-description {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+  
+  .back-button {
+    display: inline-block;
+    background-color: #0d47a1;
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  .back-button:hover {
+    transform: translateY(-2px);
+    /* box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); */
+  }
+  
+  @media (max-width: 768px) {
+    .error-code {
+      font-size: 6rem;
+    }
+  
+    .error-message {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  

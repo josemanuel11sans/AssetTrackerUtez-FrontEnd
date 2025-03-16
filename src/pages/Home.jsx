@@ -21,35 +21,10 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material"
-import {
-  Building2,
-  LayoutGrid,
-  Package,
-  ClipboardList,
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  BarChart3,
-  PieChart as LucidePieChart,
-} from "lucide-react"
-
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart as RePieChart,
-  Pie,
-  Cell,
-} from "recharts"
+import { Building2, LayoutGrid, Package, ClipboardList, Plus, Edit, Trash2 } from "lucide-react"
+// Eliminar la importación de Sidebar
 import Grafico from "../components/dashboard/Grafico"
 import Pastel from "../components/dashboard/Pastel"
-import Estadisticas from "../components/dashboard/Estadisticas"
 import HeaderDashboard from "../components/dashboard/HeaderDashboard"
 
 // Datos de ejemplo para el dashboard
@@ -119,7 +94,6 @@ const inventoryData = [
   { id: 3, fecha: "2023-07-10", edificio: "Edificio C", espacio: "Oficina 301", numRecursos: 5, estado: "Completado" },
 ]
 
-
 const Home = () => {
   const [tabValue, setTabValue] = useState(0)
   const theme = useTheme()
@@ -127,8 +101,6 @@ const Home = () => {
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue)
   }
-
-
 
   // Estadísticas generales
   const stats = [
@@ -139,50 +111,57 @@ const Home = () => {
   ]
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Grid container spacing={3}>
+    <Box sx={{ flexGrow: 1, p: 0 }}>
+      <Grid container spacing={0}>
         {/* Encabezado */}
         <HeaderDashboard />
-        {/* Tarjetas de estadísticas */}
-        {/* <Estadisticas /> */}
-        {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card>
-              <CardContent sx={{ display: "flex", alignItems: "center" }}>
-                <Box
-                  sx={{
-                    mr: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: `${stat.color}15`,
-                    p: 1.5,
-                    borderRadius: "50%",
-                  }}
-                >
-                  {React.cloneElement(stat.icon, { color: stat.color })}
-                </Box>
-                <Box>
-                  <Typography variant="h5" component="div">
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.title}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
 
-        {/* Grafico de barras */}
-        <Grafico />
-        {/* Gráfico de pastel */}
-        <Pastel />
+        {/* Tarjetas de estadísticas */}
+        <Grid container spacing={0}>
+          {stats.map((stat, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card sx={{ m: 0, height: "100%", borderRadius: 0, boxShadow: "none", border: "1px solid #e0e0e0" }}>
+                <CardContent sx={{ display: "flex", alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: `${stat.color}15`,
+                      p: 1.5,
+                      borderRadius: "50%",
+                    }}
+                  >
+                    {React.cloneElement(stat.icon, { color: stat.color })}
+                  </Box>
+                  <Box>
+                    <Typography variant="h5" component="div">
+                      {stat.value}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {stat.title}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Gráficos */}
+        <Grid container spacing={0}>
+          <Grid item xs={12} md={8}>
+            <Grafico />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Pastel />
+          </Grid>
+        </Grid>
 
         {/* Pestañas para diferentes módulos */}
-        <Grid item xs={12}>
-          <Paper sx={{ width: "100%" }}>
+        <Grid item xs={12} sx={{ mt: 0 }}>
+          <Paper sx={{ width: "100%", borderRadius: 0, boxShadow: "none", border: "1px solid #e0e0e0" }}>
             <Tabs
               value={tabValue}
               onChange={handleTabChange}
@@ -201,22 +180,20 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Edificios</Typography>
-                  {/* mr: 1,
-              backgroundColor: "#133e87",
-              borderRadius: "20px",
-              color: "#fff",
-              padding: "8px 20px", */}
-                  <Button style={{
-                    mr: 1,
-                    backgroundColor: "#133e87",
-                    borderRadius: "20px",
-                    color: "#fff",
-                    padding: "8px 20px",
-                    "&:hover": {
-                      backgroundColor: "#fff",
-                      color: "#133e87",
-                    },
-                  }}  variant="contained" size="small" startIcon={<Plus size={16}  />}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Plus size={16} />}
+                    sx={{
+                      backgroundColor: "#133e87",
+                      borderRadius: "20px",
+                      color: "#fff",
+                      padding: "8px 20px",
+                      "&:hover": {
+                        backgroundColor: "#0d2c61",
+                      },
+                    }}
+                  >
                     Nuevo Edificio
                   </Button>
                 </Box>
@@ -265,17 +242,20 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Espacios</Typography>
-                  <Button style={{
-                    mr: 1,
-                    backgroundColor: "#133e87",
-                    borderRadius: "20px",
-                    color: "#fff",
-                    padding: "8px 20px",
-                    "&:hover": {
-                      backgroundColor: "#fff",
-                      color: "#133e87",
-                    },
-                  }} variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Plus size={16} />}
+                    sx={{
+                      backgroundColor: "#133e87",
+                      borderRadius: "20px",
+                      color: "#fff",
+                      padding: "8px 20px",
+                      "&:hover": {
+                        backgroundColor: "#0d2c61",
+                      },
+                    }}
+                  >
                     Nuevo Espacio
                   </Button>
                 </Box>
@@ -326,17 +306,20 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Recursos</Typography>
-                  <Button style={{
-                    mr: 1,
-                    backgroundColor: "#133e87",
-                    borderRadius: "20px",
-                    color: "#fff",
-                    padding: "8px 20px",
-                    "&:hover": {
-                      backgroundColor: "#fff",
-                      color: "#133e87",
-                    },
-                  }} variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Plus size={16} />}
+                    sx={{
+                      backgroundColor: "#133e87",
+                      borderRadius: "20px",
+                      color: "#fff",
+                      padding: "8px 20px",
+                      "&:hover": {
+                        backgroundColor: "#0d2c61",
+                      },
+                    }}
+                  >
                     Nuevo Recurso
                   </Button>
                 </Box>
@@ -391,17 +374,20 @@ const Home = () => {
               <Box sx={{ p: 3 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
                   <Typography variant="h6">Lista de Inventarios</Typography>
-                  <Button style={{
-                    mr: 1,
-                    backgroundColor: "#133e87",
-                    borderRadius: "20px",
-                    color: "#fff",
-                    padding: "8px 20px",
-                    "&:hover": {
-                      backgroundColor: "#fff",
-                      color: "#133e87",
-                    },
-                  }} variant="contained" size="small" startIcon={<Plus size={16} />}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<Plus size={16} />}
+                    sx={{
+                      backgroundColor: "#133e87",
+                      borderRadius: "20px",
+                      color: "#fff",
+                      padding: "8px 20px",
+                      "&:hover": {
+                        backgroundColor: "#0d2c61",
+                      },
+                    }}
+                  >
                     Nuevo Inventario
                   </Button>
                 </Box>
@@ -454,3 +440,4 @@ const Home = () => {
 }
 
 export default Home
+

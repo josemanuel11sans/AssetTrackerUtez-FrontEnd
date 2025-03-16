@@ -1,9 +1,5 @@
-import React from "react";
-import { Grid, Paper, Typography, Box, Button } from "@mui/material";
-import { Plus, Search } from "lucide-react"; // Importa los íconos adecuados
-import ZenDotsTTF from "../../assets/fonts/ZenDots-Regular.ttf";
-
-// Crea el tema y agrega la fuente
+import { Grid, Paper, Box, Button } from "@mui/material"
+import { Plus, Search } from "lucide-react" // Importa los íconos adecuados
 
 const HeaderDashboard = () => {
   return (
@@ -14,32 +10,32 @@ const HeaderDashboard = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          boxShadow: "none",
+          border: "1px solid #e0e0e0",
         }}
       >
         <samp
           style={{
-            fontSize: "3rem",
+            fontSize: "50px",
             fontWeight: "extrabold",
             letterSpacing: "10px",
-            color: "#133e87"
+            color: "#133e87",
           }}
         >
-          ASSET TRACKER UTEZ
+          ASSETTRACKER UTEZ
         </samp>
 
-        <Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <Button
             variant="contained"
             startIcon={<Plus size={18} />}
             sx={{
-              mr: 1,
               backgroundColor: "#133e87",
               borderRadius: "20px",
               color: "#fff",
               padding: "8px 20px",
               "&:hover": {
-                backgroundColor: "#fff",
-                color: "#133e87",
+                backgroundColor: "#0d2c61",
               },
             }}
           >
@@ -49,13 +45,13 @@ const HeaderDashboard = () => {
             variant="outlined"
             startIcon={<Search size={18} />}
             sx={{
-              backgroundColor: "#133e87",
+              borderColor: "#133e87",
               borderRadius: "20px",
-              color: "#fff",
+              color: "#133e87",
               padding: "8px 20px",
               "&:hover": {
-                backgroundColor: "#fff",
-                color: "#133e87",
+                backgroundColor: "#f0f4fa",
+                borderColor: "#0d2c61",
               },
             }}
           >
@@ -64,7 +60,8 @@ const HeaderDashboard = () => {
         </Box>
       </Paper>
     </Grid>
-  );
-};
+  )
+}
 
-export default HeaderDashboard;
+export default HeaderDashboard
+
