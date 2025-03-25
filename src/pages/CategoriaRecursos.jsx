@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { getCategoriasRecursos } from '../api/caregoriasRecursos'; // Import the API function
 import {
   Table,
   TableBody,
@@ -15,11 +15,11 @@ import {
   TablePagination,
   IconButton,
   Typography,
-  Button, // Importa el componente Button
+  Button,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search"; // Ícono de lupa
-import EditIcon from "@mui/icons-material/Edit"; // Ícono de lápiz
-import AddIcon from "@mui/icons-material/Add"; // Ícono de más
+import SearchIcon from "@mui/icons-material/Search";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 
 const CategoriaRecursos = () => {
   const [categorias, setCategorias] = useState([]);
@@ -34,12 +34,9 @@ const CategoriaRecursos = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/categoriasRecursos/all"
-        );
+        const response = await getCategoriasRecursos(); // Use the imported API function
         const newData = response.data.result;
 
-        // Solo actualiza si los datos han cambiado
         if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
           setCategorias(newData);
           setFilteredCategorias(newData);
@@ -89,7 +86,6 @@ const CategoriaRecursos = () => {
   };
 
   const handleAddCategory = () => {
-    // Aquí puedes manejar la lógica para agregar una nueva categoría.
     console.log("Agregar nueva categoría");
   };
 
@@ -109,7 +105,6 @@ const CategoriaRecursos = () => {
           boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
         }}
       >
-        {/* Buscador con icono de lupa */}
         <div
           style={{
             display: "flex",
@@ -117,7 +112,7 @@ const CategoriaRecursos = () => {
             borderRadius: "20px",
             border: "1px solid #ccc",
             padding: "5px 10px",
-            marginRight: "20px", // Agregado un margen a la derecha para separar el buscador y el selector
+            marginRight: "20px",
           }}
         >
           <SearchIcon style={{ marginRight: "5px" }} />
@@ -135,7 +130,6 @@ const CategoriaRecursos = () => {
           />
         </div>
 
-        {/* Selector de estado sin MUI */}
         <div
           style={{
             borderRadius: "20px",
@@ -160,7 +154,7 @@ const CategoriaRecursos = () => {
           </select>
         </div>
       </div>
-      {/* Título con el botón "Agregar categoría" */}
+      
       <div style={{ marginBottom: "10px", padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h5" align="left" color="#133e87" fontFamily={'sans-serif'} fontSize={30}>
           Categorías de recursos
@@ -182,113 +176,112 @@ const CategoriaRecursos = () => {
           Agregar categoría
         </Button>
       </div>
-    <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
-      <TableContainer
-        component={Paper}
-        sx={{
-          borderRadius: 2,
-          boxShadow: 3,
-          overflowX: "auto",
-          width: "100%",
-        }}
-      >
-        <Table size="small">
-          <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: "#133e87", // Color de fondo de los encabezados
-                zIndex: 1,
-              }}
-            >
-              {["ID", "Nombre", "Material", "Imagen", "Status", "Acciones"].map((header) => (
-                <TableCell
-                  key={header}
-                  sx={{
-                    color: "white",
-                    fontWeight: "bold",
-                    textAlign: "center",
-                    padding: "12px 16px",
-                  }}
-                >
-                  {header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredCategorias
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((categoria) => (
-                <TableRow
-                  key={categoria.id}
-                  sx={{
-                    "&:hover": { backgroundColor: "#f5f5f5" },
-                    transition: "background-color 0.3s",
-                  }}
-                >
-                  <TableCell sx={{ textAlign: "center" }}>{categoria.id}</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>{categoria.nombre}</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>{categoria.material}</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <img
-                      src={categoria.imagenUrl}
-                      alt={categoria.nombre}
-                      width="40"
-                      style={{ borderRadius: "5px", cursor: "pointer" }}
-                      onClick={() => handleClickOpen(categoria.imagenUrl)}
-                    />
+      
+      <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            boxShadow: 3,
+            overflowX: "auto",
+            width: "100%",
+          }}
+        >
+          <Table size="small">
+            <TableHead>
+              <TableRow
+                sx={{
+                  backgroundColor: "#133e87",
+                  zIndex: 1,
+                }}
+              >
+                {["ID", "Nombre", "Material", "Imagen", "Status", "Acciones"].map((header) => (
+                  <TableCell
+                    key={header}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      padding: "12px 16px",
+                    }}
+                  >
+                    {header}
                   </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <Box
-                      sx={{
-                        width: 16,
-                        height: 16,
-                        borderRadius: "50%",
-                        backgroundColor: categoria.status ? "green" : "red",
-                        display: "inline-block",
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    <IconButton
-                      sx={{
-                        backgroundColor: "#133E87",
-                        color: "white",
-                        borderRadius: "50%",
-                        padding: "6px",
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          component="div"
-          count={filteredCategorias.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </TableContainer>
-
-      {/* Modal de Imagen */}
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>Imagen de la categoría</DialogTitle>
-        <DialogContent>
-          <img
-            src={selectedImage}
-            alt="Imagen seleccionada"
-            style={{ width: "100%" }}
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredCategorias
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((categoria) => (
+                  <TableRow
+                    key={categoria.id}
+                    sx={{
+                      "&:hover": { backgroundColor: "#f5f5f5" },
+                      transition: "background-color 0.3s",
+                    }}
+                  >
+                    <TableCell sx={{ textAlign: "center" }}>{categoria.id}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{categoria.nombre}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{categoria.material}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <img
+                        src={categoria.imagenUrl}
+                        alt={categoria.nombre}
+                        width="40"
+                        style={{ borderRadius: "5px", cursor: "pointer" }}
+                        onClick={() => handleClickOpen(categoria.imagenUrl)}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Box
+                        sx={{
+                          width: 16,
+                          height: 16,
+                          borderRadius: "50%",
+                          backgroundColor: categoria.status ? "green" : "red",
+                          display: "inline-block",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <IconButton
+                        sx={{
+                          backgroundColor: "#133E87",
+                          color: "white",
+                          borderRadius: "50%",
+                          padding: "6px",
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={filteredCategorias.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
           />
-        </DialogContent>
-      </Dialog>
-    </div>
+        </TableContainer>
 
+        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+          <DialogTitle>Imagen de la categoría</DialogTitle>
+          <DialogContent>
+            <img
+              src={selectedImage}
+              alt="Imagen seleccionada"
+              style={{ width: "100%" }}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
     </>
   );
 };
