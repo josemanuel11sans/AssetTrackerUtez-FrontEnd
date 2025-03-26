@@ -245,7 +245,8 @@ const Responsables = () => {
               ))}
           </TableBody>
         </Table>
-        <TablePagination
+      
+         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
           count={filteredResponsables.length}
@@ -253,6 +254,10 @@ const Responsables = () => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Filas por página:"
+          labelDisplayedRows={({ from, to, count }) => 
+            `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
+          }
         />
       </TableContainer>
     </div>
