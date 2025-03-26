@@ -2,7 +2,8 @@ import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import "../styles/Login.css"; // Asegúrate de que el archivo CSS esté correctamente enlazado
+import { User, Lock } from "lucide-react";
+import "../styles/Login.css"; 
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -35,40 +36,39 @@ const Login = () => {
       <div className="login-box fixed-box">
         {/* Lado izquierdo: Imagen o ilustración */}
         <div className="illustration">
-          {/* Aquí puedes agregar una imagen, por ejemplo */}
-          <h1 className="title">AssetTracker</h1>
-          <h2 className="subtitle">UTEZ</h2>
+          <img src="../src/assets/textLogo.png" alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />
+          <h1 className="title">Bienvenido AssetTracker</h1>
         </div>
-
         {/* Lado derecho: Formulario de login */}
         <div className="form-container">
           <h1 className="title2">Inicio de Sesión</h1>
-          <p className="description">
-            Bienvenido, por favor ingresa tu cuenta para acceder.
-          </p>
+          <p className="description">Bienvenido de nuevo, por favor ingrese sus datos</p>
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="input-group">
               <label>Correo:</label>
-              <input
-                type="email"
-                placeholder="ejemplo@utez.edu.mx"
-                value={correo}
-                onChange={handleCorreoChange}
-                required
-              />
+              <div className="input-container">
+                <User className="icon" size={20} color="#133E87 " />
+                <input 
+                  type="email" 
+                  placeholder="ejemplo@utez.edu.mx" 
+                  value={correo}
+                  onChange={handleCorreoChange}
+                  required
+                />
+              </div>
             </div>
             <div className="input-group">
               <label>Contraseña:</label>
-              <input
-                type="password"
-                placeholder=". . . . . . ."
-                value={password}
-                onChange={handlePasswordChange}
-                required
-              />
-            </div>
-            <div className="links">
-              <a href="#">¿Olvidaste tu contraseña?</a>
+              <div className="input-container">
+                <Lock className="icon" size={20} color="#133E87 " />
+                <input 
+                  type="password" 
+                  placeholder=". . . . . . ." 
+                  value={password}
+                  onChange={handlePasswordChange}
+                  required 
+                />
+              </div>
             </div>
             <button type="submit" className="login-button">
               Entrar
@@ -77,9 +77,9 @@ const Login = () => {
               <p>
                 ¿Nuevo usuario? <a href="#">Crear una cuenta</a>
               </p>
+              <a href="#">¿Olvidaste tu contraseña?</a>
             </div>
           </form>
-          
         </div>
       </div>
       <ToastContainer />
