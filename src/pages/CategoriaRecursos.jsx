@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { getCategoriasRecursos, crearCategoriaRecursos } from '../api/caregoriasRecursos';
+import {
+  getCategoriasRecursos,
+  crearCategoriaRecursos,
+  chageStatus,
+} from "../api/caregoriasRecursos";
 import {
   Table,
   TableBody,
@@ -19,7 +23,7 @@ import {
   Button,
   Chip,
   TextField,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
@@ -152,11 +156,11 @@ const CategoriaRecursos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
       var response = await crearCategoriaRecursos(nombre, material, file);
       console.log("Respuesta de la API:", response);
-  
+
       if (response.type === "ERROR") {
         toast.error(response.text);
       } else if (response.type === "SUCCESS") {
@@ -164,23 +168,67 @@ const CategoriaRecursos = () => {
       } else if (response.type === "WARNING") {
         toast.warning(response.text);
       }
-  
+
       setOpenAddModal(false);
       setNombre("");
       setMaterial("");
       setFile(null);
       setPreviewImage("");
-    } catch (error) {toast.error(error.response?.data?.message || "Error al crear categoría");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al crear categoría");
       console.error("Error al crear categoría:", error);
       // Handle the error and display the appropriate toast for the error
-      
     } finally {
       setIsLoading(false);
     }
   };
-  
 
+  // Estados para el modal de confirmación de cambio de status
+  const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [selectedCategoria, setSelectedCategoria] = useState(null);
 
+  // Función para abrir el modal de confirmación
+  const handleOpenStatusModal = (categoria) => {
+    setSelectedCategoria(categoria);
+    setOpenStatusModal(true);
+  };
+
+  // Función para cerrar el modal de confirmación
+  const handleCloseStatusModal = () => {
+    setOpenStatusModal(false);
+    setSelectedCategoria(null);
+  };
+
+  // Función para cambiar el estado
+  const handleChangeStatus = async () => {
+    try {
+      if (!selectedCategoria) return;
+
+      const response = await chageStatus(selectedCategoria.id);
+
+      if (response.type === "SUCCESS") {
+        toast.success(response.text);
+        // Actualizar el estado local
+        setCategorias(
+          categorias.map((cat) =>
+            cat.id === selectedCategoria.id
+              ? { ...cat, status: !cat.status }
+              : cat
+          )
+        );
+      } else {
+        toast.error(response.text || "Error al cambiar el estado");
+      }
+
+      handleCloseStatusModal();
+    } catch (error) {
+      console.error("Error al cambiar el estado:", error);
+      toast.error(
+        error.response?.data?.message || "Error al cambiar el estado"
+      );
+      handleCloseStatusModal();
+    }
+  };
 
   return (
     <>
@@ -250,8 +298,22 @@ const CategoriaRecursos = () => {
       </div>
 
       {/* Título y botón de agregar */}
-      <div style={{ marginBottom: "10px", padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h5" align="left" color="#133e87" fontFamily={'sans-serif'} fontSize={30}>
+      <div
+        style={{
+          marginBottom: "10px",
+          padding: "10px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="h5"
+          align="left"
+          color="#133e87"
+          fontFamily={"sans-serif"}
+          fontSize={30}
+        >
           Categorías de recursos
         </Typography>
         <Button
@@ -273,7 +335,14 @@ const CategoriaRecursos = () => {
       </div>
 
       {/* Tabla de categorías */}
-      <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
+      <div
+        style={{
+          maxWidth: "1350px",
+          margin: "auto",
+          textAlign: "center",
+          padding: "0 20px",
+        }}
+      >
         <TableContainer
           component={Paper}
           sx={{
@@ -291,7 +360,14 @@ const CategoriaRecursos = () => {
                   zIndex: 1,
                 }}
               >
-                {["#", "Nombre", "Material", "Imagen", "Status", "Acciones"].map((header) => (
+                {[
+                  "#",
+                  "Nombre",
+                  "Material",
+                  "Imagen",
+                  "Status",
+                  "Acciones",
+                ].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
@@ -317,9 +393,15 @@ const CategoriaRecursos = () => {
                       transition: "background-color 0.3s",
                     }}
                   >
-                    <TableCell sx={{ textAlign: "center" }}>{categoria.id}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{categoria.nombre}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{categoria.material}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {categoria.id}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {categoria.nombre}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {categoria.material}
+                    </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <img
                         src={categoria.imagenUrl}
@@ -330,20 +412,13 @@ const CategoriaRecursos = () => {
                       />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                    <Chip   
-                              label={categoria.status ? "Activo" : "No activo"}
-                              color={categoria.status  ? "success" : "default"}
-                              size="small"
-                            />
-                      {/* <Box
-                        sx={{
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          backgroundColor: categoria.status ? "green" : "red",
-                          display: "inline-block",
-                        }}
-                      /> */}
+                      <Chip
+                        label={categoria.status ? "Activo" : "No activo"}
+                        color={categoria.status ? "success" : "default"}
+                        size="small"
+                        onClick={() => handleOpenStatusModal(categoria)}
+                        style={{ cursor: "pointer" }}
+                      />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
@@ -380,7 +455,7 @@ const CategoriaRecursos = () => {
               aria-label="close"
               onClick={handleClose}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 right: 8,
                 top: 8,
                 color: (theme) => theme.palette.grey[500],
@@ -399,14 +474,19 @@ const CategoriaRecursos = () => {
         </Dialog>
 
         {/* Modal para agregar nueva categoría */}
-        <Dialog open={openAddModal} onClose={handleCloseAddModal} maxWidth="sm" fullWidth>
+        <Dialog
+          open={openAddModal}
+          onClose={handleCloseAddModal}
+          maxWidth="sm"
+          fullWidth
+        >
           <DialogTitle>
             Agregar Nueva Categoría
             <IconButton
               aria-label="close"
               onClick={handleCloseAddModal}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 right: 8,
                 top: 8,
                 color: (theme) => theme.palette.grey[500],
@@ -428,7 +508,7 @@ const CategoriaRecursos = () => {
                 onChange={(e) => setNombre(e.target.value)}
                 autoFocus
               />
-              
+
               <TextField
                 margin="normal"
                 required
@@ -439,10 +519,10 @@ const CategoriaRecursos = () => {
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
               />
-              
+
               <input
                 accept="image/*"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 id="contained-button-file"
                 type="file"
                 name="file"
@@ -463,7 +543,11 @@ const CategoriaRecursos = () => {
                   <img
                     src={previewImage}
                     alt="Vista previa"
-                    style={{ maxWidth: "100%", maxHeight: "200px", objectFit: "cover" }}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      objectFit: "cover",
+                    }}
                   />
                 </Box>
               )}
@@ -478,6 +562,51 @@ const CategoriaRecursos = () => {
               >
                 {isLoading ? <CircularProgress size={24} /> : "Guardar"}
               </Button>
+            </Box>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={openStatusModal} onClose={handleCloseStatusModal}>
+          <DialogTitle>
+            Confirmar cambio de estado
+            <IconButton
+              aria-label="close"
+              onClick={handleCloseStatusModal}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ p: 2 }}>
+              <Typography variant="body1" gutterBottom>
+                ¿Estás seguro que deseas cambiar el estado de la categoría "
+                {selectedCategoria?.nombre}"?
+              </Typography>
+              {/* <Typography variant="body2" color="text.secondary" gutterBottom>
+          El estado actual es: {selectedCategoria?.status ? "Activo" : "Inactivo"}
+        </Typography> */}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                <Button
+                  onClick={handleCloseStatusModal}
+                  color="primary"
+                  sx={{ mr: 2 }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleChangeStatus}
+                  color="primary"
+                  variant="contained"
+                >
+                  Confirmar
+                </Button>
+              </Box>
             </Box>
           </DialogContent>
         </Dialog>
