@@ -21,7 +21,8 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    width: 800px;
+    width: 125vh;
+    height: 80vh;
 }
 
 .fixed-box {
@@ -31,8 +32,8 @@ body {
     transform: translate(-50%, -50%);
 }
 
-
 .illustration {
+    position: relative;
     width: 45%;
     display: flex;
     justify-content: center;
@@ -44,11 +45,14 @@ body {
     background-repeat: no-repeat;
 }
 
-/*
 .illustration-img {
-    max-width: 100%;
+    padding: 2vh;
+    position: absolute;
+    top: 10px; 
+    left: 10px; 
+    max-width: 30%;
     height: auto;
-}*/
+}
 
 .form-container {
     width: 60%;
@@ -56,41 +60,37 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding-top: 55px;
+    padding-bottom: 55px;
 }
 
 .title {
     font-size: 45px;
     font-weight: bold;
     color: #FFFFFF;
-    margin-bottom: 1px;
-    text-align: left;
-    padding-left: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .title2 {
     font-size: 38px;
     font-weight: bold;
     color: #133E87;
-    margin-bottom: 1px;
-    text-align: left;
-}
-
-.subtitle {
-    font-size: 18px;
-    color: #FFFFFF;
-    font-weight: bold;
-    margin-top: 0;
     text-align: left;
 }
 
 .description {
-    color: #608BC1;
-    margin-bottom: 20px;
-    font-weight: bold;
-    text-align: justify;
+    color: #9a9c9d;
+    margin-bottom: 8px;
+    margin-top: 5px;
+    text-align: left;
+    font-size: 14px;
 }
 
 .input-group {
+    margin-top: 10px;
     margin-bottom: 15px;
 }
 
@@ -98,21 +98,46 @@ body {
     display: block;
     font-size: 14px;
     color: #133E87;
-    margin-bottom: 5px;
+    padding-top: 5px;
+    margin-bottom: 3px;
     text-align: left;
 }
 
 .input-group input {
     width: 100%;
     padding: 10px;
+    background-color: #f6f6f6;
     border: 1px solid #d1d5db;
-    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-container .icon {
+    position: absolute;
+    left: 10px;
+    color: gray;
+}
+
+.input-container input {
+    padding-left: 35px; 
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    height: 40px;
 }
 
 .links {
     display: flex;
     font-size: 14px;
-    margin-bottom: 20px;
+    margin-top: 20px; 
+    margin-bottom: 15px; 
+    flex-direction: column;
+    text-align: center;
 }
 
 .links a {
@@ -125,7 +150,7 @@ body {
 }
 
 .login-button {
-    width: 106%;
+    width: 100%;
     padding: 10px;
     background: #133E87;
     color: white;
@@ -133,6 +158,8 @@ body {
     border-radius: 15px;
     cursor: pointer;
     font-size: 16px;
+    margin-top: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
 }
 
 .login-button:hover {
