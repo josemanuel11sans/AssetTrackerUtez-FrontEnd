@@ -29,7 +29,7 @@ import HeaderDashboard from "../components/dashboard/HeaderDashboard"
 
 // Datos de ejemplo para el dashboard
 const buildingsData = [
-  { id: 1, nombre: "Edificio A", pisos: 3, numEspacios: 15, estado: "Activo" },
+  { id: 1, nombre: "Edificio A", pisos: 3, numEspacios: 15, estado: "true" },
   { id: 2, nombre: "Edificio B", pisos: 2, numEspacios: 10, estado: "Activo" },
   { id: 3, nombre: "Edificio C", pisos: 4, numEspacios: 20, estado: "Inactivo" },
   { id: 4, nombre: "Edificio D", pisos: 1, numEspacios: 5, estado: "Activo" },

@@ -17,6 +17,7 @@ import {
   IconButton,
   Typography,
   Button,
+  Chip,
   TextField,
   CircularProgress
 } from "@mui/material";
@@ -147,25 +148,38 @@ const CategoriaRecursos = () => {
   };
 
   // Enviar formulario
+  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
-      await crearCategoriaRecursos(nombre, material, file);
-      toast.success("Categoría creada exitosamente");
+      var response = await crearCategoriaRecursos(nombre, material, file);
+      console.log("Respuesta de la API:", response);
+  
+      if (response.type === "ERROR") {
+        toast.error(response.text);
+      } else if (response.type === "SUCCESS") {
+        toast.success(response.text);
+      } else if (response.type === "WARNING") {
+        toast.warning(response.text);
+      }
+  
       setOpenAddModal(false);
       setNombre("");
       setMaterial("");
       setFile(null);
       setPreviewImage("");
-    } catch (error) {
+    } catch (error) {toast.error(error.response?.data?.message || "Error al crear categoría");
       console.error("Error al crear categoría:", error);
-      toast.error(error.response?.data?.message || "Error al crear categoría");
+      // Handle the error and display the appropriate toast for the error
+      
     } finally {
       setIsLoading(false);
     }
   };
+  
+
 
 
   return (
@@ -277,7 +291,7 @@ const CategoriaRecursos = () => {
                   zIndex: 1,
                 }}
               >
-                {["ID", "Nombre", "Material", "Imagen", "Status", "Acciones"].map((header) => (
+                {["#", "Nombre", "Material", "Imagen", "Status", "Acciones"].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
@@ -316,7 +330,12 @@ const CategoriaRecursos = () => {
                       />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <Box
+                    <Chip   
+                              label={categoria.status ? "Activo" : "No activo"}
+                              color={categoria.status  ? "success" : "default"}
+                              size="small"
+                            />
+                      {/* <Box
                         sx={{
                           width: 16,
                           height: 16,
@@ -324,7 +343,7 @@ const CategoriaRecursos = () => {
                           backgroundColor: categoria.status ? "green" : "red",
                           display: "inline-block",
                         }}
-                      />
+                      /> */}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
