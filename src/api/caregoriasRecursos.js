@@ -14,11 +14,11 @@ export const crearCategoriaRecursos = async (nombre, material, file) => {
     formData.append("file", file); // Asegúrate de que "file" sea el nombre que espera el backend
   
     // Usamos api (tu instancia de Axios), pero sobrescribimos headers para esta petición
-    const response = await api.post("categoriasRecursos/save", formData, {
-      headers: {
-        // Eliminamos 'Content-Type': 'application/json' para que Axios lo ajuste automáticamente
-        "Authorization": `Bearer ${localStorage.getItem("jwt")}`, // Opcional, ya que el interceptor lo añade
-      },
+    const response = await api.post(`${endpoint}/save`, formData, {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwt")}`,
+            "Content-Type": "multipart/form-data",
+          },
     });
   
     return response.data;
