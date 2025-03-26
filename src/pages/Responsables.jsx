@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Table,
   TableBody,
@@ -17,6 +16,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search"; // Ícono de lupa
 import EditIcon from "@mui/icons-material/Edit"; // Ícono de lápiz
 import AddIcon from "@mui/icons-material/Add"; // Ícono de más
+import { getResponsables } from "../api/responsablesApi";
 
 const Responsables = () => {
   const [responsables, setResponsables] = useState([]);
@@ -25,17 +25,12 @@ const Responsables = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
+  const i = 1;
 
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await axios.get(
-          "https://3a76hppbug.execute-api.us-east-1.amazonaws.com/responsables/all",
-          {headers:{
-            'Content-Type' : 'applications/json',
-            "Authorization": `Bearer ${localStorage.getItem("jwt")}`
-          }}
-        );
+        const response = await getResponsables();
         const newData = response.data.result;
         console.log(newData)
         // Solo actualiza si los datos han cambiado
@@ -207,15 +202,15 @@ const Responsables = () => {
           <TableBody>
             {filteredResponsables
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((responsable) => (
+              .map((responsable, index) => (
                 <TableRow
-                  key={responsable.id || `${responsable.nombre}-${Math.random()}`}
+                  key={responsable.id }
                   sx={{
                     "&:hover": { backgroundColor: "#f5f5f5" },
                     transition: "background-color 0.3s",
                   }}
                 >
-                  <TableCell sx={{ textAlign: "center" }}>{responsable.id}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{page * rowsPerPage + index + 1}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>{responsable.nombre}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>{responsable.divisionAcademica}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
