@@ -150,11 +150,15 @@ const CategoriaRecursos = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
       await crearCategoriaRecursos(nombre, material, file);
       toast.success("Categoría creada exitosamente");
-      handleCloseAddModal();
+      setOpenAddModal(false);
+      setNombre("");
+      setMaterial("");
+      setFile(null);
+      setPreviewImage("");
     } catch (error) {
       console.error("Error al crear categoría:", error);
       toast.error(error.response?.data?.message || "Error al crear categoría");
@@ -162,6 +166,7 @@ const CategoriaRecursos = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <>
@@ -421,6 +426,7 @@ const CategoriaRecursos = () => {
                 style={{ display: 'none' }}
                 id="contained-button-file"
                 type="file"
+                name="file"
                 onChange={handleFileChange}
               />
               <label htmlFor="contained-button-file">

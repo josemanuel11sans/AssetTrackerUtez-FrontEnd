@@ -1,5 +1,5 @@
 
-import { RoutesConfig } from "./routes/RoutesConfig.jsx";
+import { RoutesConfig } from "./routes/RoutesConfig";
 import { AuthProvider } from "./context/AuthContext.jsx";
 function App() {
   return (
