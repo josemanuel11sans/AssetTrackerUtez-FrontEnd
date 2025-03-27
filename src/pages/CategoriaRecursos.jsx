@@ -52,41 +52,43 @@ const CategoriaRecursos = () => {
   const [previewImage, setPreviewImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Estados para notificaciones
   const [showtoas, setShowtoas] = useState(false);
 
-  // Obtener categorías
-  useEffect(() => {
-    const fetchCategorias = async () => {
-      try {
-        const response = await getCategoriasRecursos();
-        const newData = response.data.result;
+// Obtener categorías
+useEffect(() => {
+  const fetchCategorias = async () => {
+    try {
+      const response = await getCategoriasRecursos();
+      const newData = response.data.result;
 
-        // Verificar si las categorías han cambiado
-        if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
-          setCategorias(newData);
-          setFilteredCategorias(newData);
+      // Verificar si las categorías han cambiado
+      if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
+        setCategorias(newData);
+        setFilteredCategorias(newData);
 
-          // Mostrar toast de nuevos datos si las categorías han cambiado
-          if (!showtoas) {
-            toast.success("Nuevos datos cargados");
-            setShowtoas(true);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        if (!showtoas) {
-          toast.error("Error al cargar las categorias.");
+        // Verificar si ya se mostró el toast para evitar mostrarlo al recargar la página
+        if (!showtoas && !localStorage.getItem('toastShown')) {
+          toast.success("Nuevos datos cargados");
           setShowtoas(true);
+          localStorage.setItem('toastShown', 'true');  // Marcar que ya se mostró el toast
         }
       }
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      if (!showtoas && !localStorage.getItem('toastShown')) {
+        toast.error("Error al cargar las categorias.");
+        setShowtoas(true);
+        localStorage.setItem('toastShown', 'true');  // Marcar que ya se mostró el toast
+      }
+    }
+  };
 
-    fetchCategorias();
-    const interval = setInterval(fetchCategorias, 5000);
+  fetchCategorias();
+  const interval = setInterval(fetchCategorias, 5000);
 
-    return () => clearInterval(interval);
-  }, [categorias, showtoas]);
+  return () => clearInterval(interval);
+}, [categorias, showtoas]);
+
 
   // Filtrar categorías
   useEffect(() => {
