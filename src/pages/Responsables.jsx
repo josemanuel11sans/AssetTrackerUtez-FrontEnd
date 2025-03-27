@@ -210,7 +210,7 @@ const Responsables = () => {
                     transition: "background-color 0.3s",
                   }}
                 >
-                  <TableCell sx={{ textAlign: "center" }}>{page * rowsPerPage + index + 1}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{responsable.id}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>{responsable.nombre}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>{responsable.divisionAcademica}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>

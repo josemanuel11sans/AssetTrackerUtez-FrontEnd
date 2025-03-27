@@ -195,7 +195,7 @@ const Usuarios = () => {
                   zIndex: 1,
                 }}
               >
-                {["ID", "Nombre", "Correo", "Estado", "Acciones"].map((header) => (
+                {["ID", "Nombre", "Correo", "Tipo de usuario","Estado", "Acciones"].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
@@ -224,6 +224,7 @@ const Usuarios = () => {
                     <TableCell sx={{ textAlign: "center" }}>{usuario.id}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{usuario.nombre} {usuario.apellidos}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>{usuario.correo}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>{usuario.rol === "ROLE_ADMIN_ACCESS" ? "Administrador" : "Inspector"}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Box
                         sx={{
