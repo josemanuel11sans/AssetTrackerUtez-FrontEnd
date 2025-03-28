@@ -13,10 +13,12 @@ import NuevasCuentas from "../pages/NuevasCuentas";
 import Login from "../pages/Login";
 import NotFoundPage from "../pages/Notfoundpage";
 import Layout from "../components/Layout";
+import Registro from "../pages/Registro";
 
 export const RoutesConfig = () => {
   const { user } = useContext(AuthContext);
-   console.log(user)
+  console.log(user)
+  
   return (
     <Routes>
       {user ? (
@@ -31,7 +33,10 @@ export const RoutesConfig = () => {
           <Route path="/nuevas-cuentas" element={<NuevasCuentas />} />
         </Route>
       ) : (
-        <Route path="/" element={<Login />} />
+        <>
+          <Route path="/" element={<Login />} />
+          <Route path="/registro" element={<Registro />} />
+        </>
       )}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

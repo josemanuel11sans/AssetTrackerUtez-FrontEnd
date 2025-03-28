@@ -2,14 +2,15 @@ import React, { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { User, Lock } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import "../styles/Login.css"; 
 import logo from "../assets/textLogo.png"
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
-  const { handleLogin } = useContext(AuthContext);
+  const {handleLogin} = useContext(AuthContext);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleCorreoChange = (e) => {
@@ -48,7 +49,7 @@ const Login = () => {
             <div className="input-group">
               <label>Correo:</label>
               <div className="input-container">
-                <User className="icon" size={20} color="#133E87 " />
+                <Mail className="icon" size={20} color="#133E87 " />
                 <input 
                   type="email" 
                   placeholder="ejemplo@utez.edu.mx" 
@@ -63,12 +64,19 @@ const Login = () => {
               <div className="input-container">
                 <Lock className="icon" size={20} color="#133E87 " />
                 <input 
-                  type="password" 
+                  type={showPassword ? "text" : "password"} 
                   placeholder=". . . . . . ." 
                   value={password}
                   onChange={handlePasswordChange}
                   required 
                 />
+                <button
+                  type="button"
+                  className="eye-button"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <Eye size={20} color="#133E87" /> : <EyeOff size={20} color="#133E87" />}
+                </button>
               </div>
             </div>
             <button type="submit" className="login-button">
@@ -76,7 +84,17 @@ const Login = () => {
             </button>
             <div className="links">
               <p>
-                ¿Nuevo usuario? <a href="#">Crear una cuenta</a>
+                ¿Nuevo usuario?{" "}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/registro");
+                  }}
+                  className="link-button"
+                >
+                  Crear una cuenta
+                </a>
               </p>
               <a href="#">¿Olvidaste tu contraseña?</a>
             </div>

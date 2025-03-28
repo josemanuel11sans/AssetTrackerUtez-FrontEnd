@@ -1,0 +1,230 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: url('../assets/b3.svg') no-repeat center center fixed;
+    background-color: #F0F0F0;
+    background-size: cover;
+    overflow: auto;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.box {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    width: 125vh;
+    height: 80vh;
+}
+
+.fixed-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.illustration {
+    position: relative;
+    width: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    background-image: url('../assets/welcomeBackground.png');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat;
+}
+
+.illustration-img {
+    padding: 2vh;
+    position: absolute;
+    top: 10px; 
+    left: 10px; 
+    max-width: 30%;
+    height: auto;
+}
+
+.form-container {
+    width: 60%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 55px;
+    padding-bottom: 55px;
+}
+
+.form-scroll {
+    max-height: 300px; 
+    overflow-y: auto;
+    padding-right: 10px; 
+}
+
+.form-scroll::-webkit-scrollbar {
+    width: 3px;
+}
+
+.form-scroll::-webkit-scrollbar-thumb {
+    background: #133E87;
+    border-radius: 5px;
+}
+
+
+.title {
+    font-size: 45px;
+    font-weight: bold;
+    color: #FFFFFF;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.title2 {
+    font-size: 38px;
+    font-weight: bold;
+    color: #133E87;
+    text-align: left;
+}
+
+.description {
+    color: #9a9c9d;
+    margin-bottom: 8px;
+    margin-top: 5px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.input-group {
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    color: #133E87;
+    padding-top: 5px;
+    margin-bottom: 3px;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    background-color: #f6f6f6;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-container .icon {
+    position: absolute;
+    left: 10px;
+    color: gray;
+}
+
+.input-container input {
+    padding-left: 35px; 
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    height: 40px;
+}
+
+.links {
+    display: flex;
+    font-size: 14px;
+    margin-top: 20px; 
+    margin-bottom: 15px; 
+    flex-direction: column;
+    text-align: center;
+}
+
+.links a {
+    color: #133E87;
+    text-decoration: none;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.button {
+    width: 100%;
+    padding: 10px;
+    background: #133E87;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
+.button:hover {
+    background: #608BC1;
+}
+
+.eye-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: -30px;
+}
+
+.link-button {
+background: none;
+border: none;
+color: #133E87;
+cursor: pointer;
+font-size: 1rem;
+text-decoration: underline;
+}
+
+.link-button:hover {
+color: #0d2a5a;
+}
+
+.input-container select {
+    padding-left: 35px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    height: 40px;
+    font-size: 1rem;
+    appearance: none; /* Ocultar la flecha por defecto */
+    background-color: #f6f6f6;
+    cursor: pointer;
+}
+
+/* Flecha personalizada para select 
+.select-container select::after {
+    content: "▼";
+    position: absolute;
+    right: 10px;
+    font-size: 12px;
+    color: #133E87;
+    pointer-events: none;
+} 
+
+.select-container select:focus {
+    outline: none;
+    border-color: #133E87;
+} */
