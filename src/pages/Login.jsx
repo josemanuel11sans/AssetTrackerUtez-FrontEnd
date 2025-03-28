@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { User, Lock } from "lucide-react";
 import "../styles/Login.css"; 
+import logo from "../assets/textLogo.png"
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -36,7 +37,7 @@ const Login = () => {
       <div className="login-box fixed-box">
         {/* Lado izquierdo: Imagen o ilustración */}
         <div className="illustration">
-          <img src="../src/assets/textLogo.png" alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />
+          <img src={logo} alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />
           <h1 className="title">Bienvenido AssetTracker</h1>
         </div>
         {/* Lado derecho: Formulario de login */}
