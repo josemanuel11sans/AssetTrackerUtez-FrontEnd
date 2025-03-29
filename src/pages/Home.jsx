@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState,useEffect } from "react"
 import {
   Box,
   Grid,
@@ -27,12 +27,20 @@ import Grafico from "../components/dashboard/Grafico"
 import Pastel from "../components/dashboard/Pastel"
 import HeaderDashboard from "../components/dashboard/HeaderDashboard"
 
+
+// Importar las funciones que cuentan los registros
+import { contarEdificios } from '../api/edificios';
+import { contarEspacios } from '../api/espacios';
+import { contarRecursos } from '../api/recursos';
+import { contarInventarios } from '../api/inventarios';
+
 // Datos de ejemplo para el dashboard
 const buildingsData = [
   { id: 1, nombre: "Edificio A", pisos: 3, numEspacios: 15, estado: "true" },
   { id: 2, nombre: "Edificio B", pisos: 2, numEspacios: 10, estado: "Activo" },
   { id: 3, nombre: "Edificio C", pisos: 4, numEspacios: 20, estado: "Inactivo" },
   { id: 4, nombre: "Edificio D", pisos: 1, numEspacios: 5, estado: "Activo" },
+  
 ]
 
 const spacesData = [
@@ -102,12 +110,42 @@ const Home = () => {
     setTabValue(newValue)
   }
 
+   // Estado para cada estadística
+    const [edificios, setEdificios] = useState(0);
+    const [espacios, setEspacios] = useState(0);
+    const [recursos, setRecursos] = useState(0);
+    const [inventarios, setInventarios] = useState(0);
+
+   useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [edificiosRes, espaciosRes, recursosRes, inventariosRes] = await Promise.all([
+            contarEdificios(),
+            contarEspacios(),
+            contarRecursos(),
+            contarInventarios(),
+          ]);
+  
+          setEdificios(edificiosRes.data);
+          setEspacios(espaciosRes.data);
+          setRecursos(recursosRes.data);
+          setInventarios(inventariosRes.data);
+        } catch (error) {
+          console.error('Error al obtener las estadísticas:', error);
+        }
+      };
+  
+      fetchData();
+    }, []);
+
+
+
   // Estadísticas generales
   const stats = [
-    { title: "Edificios", value: 4, icon: <Building2 size={24} />, color: theme.palette.primary.main },
-    { title: "Espacios", value: 50, icon: <LayoutGrid size={24} />, color: theme.palette.secondary.main },
-    { title: "Recursos", value: 120, icon: <Package size={24} />, color: theme.palette.success.main },
-    { title: "Inventarios", value: 8, icon: <ClipboardList size={24} />, color: theme.palette.warning.main },
+    { title: "Edificios", value: edificios, icon: <Building2 size={24} />, color: theme.palette.primary.main },
+    { title: "Espacios", value: espacios, icon: <LayoutGrid size={24} />, color: theme.palette.secondary.main },
+    { title: "Recursos", value: recursos, icon: <Package size={24} />, color: theme.palette.success.main },
+    { title: "Inventarios", value: inventarios, icon: <ClipboardList size={24} />, color: theme.palette.warning.main },
   ]
 
   return (

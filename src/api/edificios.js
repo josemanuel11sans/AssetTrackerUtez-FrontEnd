@@ -30,19 +30,23 @@ export const chageStatus = async (id) => {
 };
 
 export const crearEdificio = async (nombre, numeroPisos) => {
-    try {
-      const formData = new FormData();
-      formData.append("nombre", nombre);
-      formData.append("numerPisos", numeroPisos);
-      const response = await api.post(`${endpoint}/save`, formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error al crear el edificio");
-      throw error;
-    }
-  };
+  try {
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("numerPisos", numeroPisos);
+    const response = await api.post(`${endpoint}/save`, formData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear el edificio");
+    throw error;
+  }
+};
+
+export const contarEdificios = async () => {
+  return await api.get(`${endpoint}/count`);
+};

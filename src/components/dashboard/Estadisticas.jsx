@@ -1,16 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, Card, CardContent, Box, Typography } from '@mui/material';
-import { FaBuilding, FaLayerGroup, FaCogs, FaClipboardList } from 'react-icons/fa'; // Cambié Building2 a FaBuilding
+import { FaBuilding, FaLayerGroup, FaCogs, FaClipboardList } from 'react-icons/fa';
 import { useTheme } from '@mui/material/styles';
+
+// Importar las funciones que cuentan los registros
+import { contarEdificios } from '../../api/edificios';
+import { contarEspacios } from '../../api/espacios';
+import { contarRecursos } from '../../api/recursos';
+import { contarInventarios } from '../../api/inventarios';
 
 const Estadisticas = () => {
   const theme = useTheme();
 
+  // Estado para cada estadística
+  const [edificios, setEdificios] = useState(0);
+  const [espacios, setEspacios] = useState(0);
+  const [recursos, setRecursos] = useState(0);
+  const [inventarios, setInventarios] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [edificiosRes, espaciosRes, recursosRes, inventariosRes] = await Promise.all([
+          contarEdificios(),
+          contarEspacios(),
+          contarRecursos(),
+          contarInventarios(),
+        ]);
+
+        setEdificios(edificiosRes.data);
+        setEspacios(espaciosRes.data);
+        setRecursos(recursosRes.data);
+        setInventarios(inventariosRes.data);
+      } catch (error) {
+        console.error('Error al obtener las estadísticas:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const stats = [
-    { title: "Edificios", value: 4, icon: <FaBuilding size={24} />, color: theme.palette.primary.main },
-    { title: "Espacios", value: 50, icon: <FaLayerGroup size={24} />, color: theme.palette.secondary.main },
-    { title: "Recursos", value: 120, icon: <FaCogs size={24} />, color: theme.palette.success.main },
-    { title: "Inventarios", value: 8, icon: <FaClipboardList size={24} />, color: theme.palette.warning.main },
+    { title: 'Edificios', value: edificios, icon: <FaBuilding size={24} />, color: theme.palette.primary.main },
+    { title: 'Espacios', value: espacios, icon: <FaLayerGroup size={24} />, color: theme.palette.secondary.main },
+    { title: 'Recursos', value: recursos, icon: <FaCogs size={24} />, color: theme.palette.success.main },
+    { title: 'Inventarios', value: inventarios, icon: <FaClipboardList size={24} />, color: theme.palette.warning.main },
   ];
 
   return (
@@ -18,16 +52,16 @@ const Estadisticas = () => {
       {stats.map((stat, index) => (
         <Grid item xs={12} sm={6} md={3} key={index}>
           <Card>
-            <CardContent sx={{ display: "flex", alignItems: "center" }}>
+            <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
               <Box
                 sx={{
                   mr: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   bgcolor: `${stat.color}15`,
                   p: 1.5,
-                  borderRadius: "50%",
+                  borderRadius: '50%',
                 }}
               >
                 {React.cloneElement(stat.icon, { color: stat.color })}
