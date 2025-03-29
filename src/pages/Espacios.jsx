@@ -1,7 +1,12 @@
+import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { getEdificios, chageStatus, crearEdificio } from "../api/edificios";
-// import { crearCategoriaRecursos } from "../api/caregoriasRecursos";
+import {
+  getEdificios,
+  chageStatus,
+  crearEdificio,
+  getEdificiosid,
+} from "../api/edificios";
 import {
   Table,
   TableBody,
@@ -26,15 +31,14 @@ import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-// import LinkIcon from "@mui/icons-material/Link";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 import { Navigate, useNavigate } from "react-router-dom";
 
-const GestionInventarios = () => {
+const Espacios = () => {
   // Estados para la tabla y búsqueda
-  const [categorias, setCategorias] = useState([]);
-  const [filteredCategorias, setFilteredCategorias] = useState([]);
+  const [edificio, setEdificio] = useState({ espacios: [] });
+  const [filteredEspacios, setFilteredEspacios] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,60 +48,57 @@ const GestionInventarios = () => {
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
 
-  // Estados para el modal de agregar categoría
+  // Estados para el modal de agregar espacio
   const [openAddModal, setOpenAddModal] = useState(false);
   const [nombre, setNombre] = useState("");
-  const [numeroPisos, setNumeroPisos] = useState("");
-  // const [file, setFile] = useState(null);
-  // const [previewImage, setPreviewImage] = useState("");
+  const [numeroPlanta, setNumeroPlanta] = useState("");
+  const [file, setFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  //para la nevegacion hacia espaccios
   const navigate = useNavigate();
+  const { id } = useParams();
 
-  // Estados para notificaciones
-  // const [showtoas, setShowtoas] = useState(false);
-
-  // Obtener edificios
+  // Obtener edificio y sus espacios
   useEffect(() => {
-    const fetchCategorias = async () => {
+    if (!id) return;
+
+    const fetchEdificio = async () => {
       try {
-        const response = await getEdificios();
-        const newData = response.data.result;
-        // Verificar si las categorías han cambiado
-        if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
-          setCategorias(newData);
-          setFilteredCategorias(newData);
-        }
+        const response = await getEdificiosid(id);
+        setEdificio(response.data.result);
+        setFilteredEspacios(response.data.result.espacios || []);
       } catch (error) {
         console.error("Error fetching data:", error);
-        // if (!showtoas) {
-        //   // toast.error("Error al cargar las categorias.");
-        //   // setShowtoas(true);
-        // }
+        toast.error("Error al cargar los datos del edificio");
       }
     };
 
-    fetchCategorias();
-    const interval = setInterval(fetchCategorias, 5000);
+    fetchEdificio();
+    const interval = setInterval(fetchEdificio, 5000);
 
     return () => clearInterval(interval);
-  }, [categorias]);
+  }, [id]);
 
-  // Filtrar categorías
+  // Filtrar espacios
   useEffect(() => {
-    let filtered = categorias.filter((categoria) =>
-      categoria.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = edificio.espacios.filter((espacio) =>
+      espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (statusFilter !== "all") {
       filtered = filtered.filter(
-        (categoria) => categoria.status === (statusFilter === "active")
+        (espacio) => espacio.status === (statusFilter === "active")
       );
     }
 
-    setFilteredCategorias(filtered);
-  }, [searchQuery, statusFilter, categorias]);
+    setFilteredEspacios(filtered);
+  }, [searchQuery, statusFilter, edificio.espacios]);
+
+  const handleClickOpen = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpen(true);
+  };
 
   const handleClose = () => {
     setOpen(false);
@@ -114,8 +115,8 @@ const GestionInventarios = () => {
     setPage(0);
   };
 
-  // Manejar modal de agregar categoría
-  const handleAddCategory = () => {
+  // Manejar modal de agregar espacio
+  const handleAddSpace = () => {
     setOpenAddModal(true);
   };
 
@@ -127,27 +128,35 @@ const GestionInventarios = () => {
   // Resetear formulario
   const resetForm = () => {
     setNombre("");
-    setNumeroPisos("");
+    setNumeroPlanta("");
+    setFile(null);
+    setPreviewImage("");
   };
 
   // Manejar selección de archivo
-  // const handleFileChange = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (selectedFile) {
-  //     setFile(selectedFile);
-  //     setPreviewImage(URL.createObjectURL(selectedFile));
-  //   }
-  // };
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setPreviewImage(URL.createObjectURL(selectedFile));
+    }
+  };
 
-  // Enviar formulario
-  // Enviar formulario
+  // Enviar formulario para crear nuevo espacio
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      var response = await crearEdificio(nombre, numeroPisos);
-      console.log("Respuesta de la API:", response);
+      // Aquí deberías llamar a la API para crear un nuevo espacio
+      // var response = await crearEspacio(id, nombre, numeroPlanta, file);
+      // console.log("Respuesta de la API:", response);
+
+      // Simulando una respuesta exitosa
+      const response = {
+        type: "SUCCESS",
+        text: "Espacio creado correctamente"
+      };
 
       if (response.type === "ERROR") {
         toast.error(response.text);
@@ -158,14 +167,10 @@ const GestionInventarios = () => {
       }
 
       setOpenAddModal(false);
-      setNombre("");
-      // setMaterial("");
-      // setFile(null);
-      // setPreviewImage("");
+      resetForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al crear categoría");
-      console.error("Error al crear categoría:", error);
-      // Handle the error and display the appropriate toast for the error
+      toast.error(error.response?.data?.message || "Error al crear espacio");
+      console.error("Error al crear espacio:", error);
     } finally {
       setIsLoading(false);
     }
@@ -173,37 +178,45 @@ const GestionInventarios = () => {
 
   // Estados para el modal de confirmación de cambio de status
   const [openStatusModal, setOpenStatusModal] = useState(false);
-  const [selectedCategoria, setSelectedCategoria] = useState(null);
+  const [selectedEspacio, setSelectedEspacio] = useState(null);
 
   // Función para abrir el modal de confirmación
-  const handleOpenStatusModal = (categoria) => {
-    setSelectedCategoria(categoria);
+  const handleOpenStatusModal = (espacio) => {
+    setSelectedEspacio(espacio);
     setOpenStatusModal(true);
   };
 
   // Función para cerrar el modal de confirmación
   const handleCloseStatusModal = () => {
     setOpenStatusModal(false);
-    setSelectedCategoria(null);
+    setSelectedEspacio(null);
   };
 
   // Función para cambiar el estado
   const handleChangeStatus = async () => {
     try {
-      if (!selectedCategoria) return;
+      if (!selectedEspacio) return;
 
-      const response = await chageStatus(selectedCategoria.id);
+      // Aquí deberías llamar a la API para cambiar el estado
+      // const response = await changeStatusEspacio(selectedEspacio.id);
+
+      // Simulando una respuesta exitosa
+      const response = {
+        type: "SUCCESS",
+        text: "Estado cambiado correctamente"
+      };
 
       if (response.type === "SUCCESS") {
         toast.success(response.text);
         // Actualizar el estado local
-        setCategorias(
-          categorias.map((cat) =>
-            cat.id === selectedCategoria.id
-              ? { ...cat, status: !cat.status }
-              : cat
+        setEdificio(prev => ({
+          ...prev,
+          espacios: prev.espacios.map(esp => 
+            esp.id === selectedEspacio.id 
+              ? { ...esp, status: !esp.status } 
+              : esp
           )
-        );
+        }));
       } else {
         toast.error(response.text || "Error al cambiar el estado");
       }
@@ -211,9 +224,7 @@ const GestionInventarios = () => {
       handleCloseStatusModal();
     } catch (error) {
       console.error("Error al cambiar el estado:", error);
-      toast.error(
-        error.response?.data?.message || "Error al cambiar el estado"
-      );
+      toast.error(error.response?.data?.message || "Error al cambiar el estado");
       handleCloseStatusModal();
     }
   };
@@ -248,7 +259,7 @@ const GestionInventarios = () => {
           <SearchIcon style={{ marginRight: "5px" }} />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder="Buscar espacios..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -302,12 +313,12 @@ const GestionInventarios = () => {
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          Inventarios / Edificios
+          {edificio.nombre} - Espacios
         </Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleAddCategory}
+          onClick={handleAddSpace}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -318,11 +329,11 @@ const GestionInventarios = () => {
           }}
         >
           <AddIcon sx={{ marginRight: "8px" }} />
-          Agregar Edificios
+          Agregar Espacio
         </Button>
       </div>
 
-      {/* Tabla de edificios  */}
+      {/* Tabla de espacios */}
       <div
         style={{
           maxWidth: "1350px",
@@ -351,11 +362,12 @@ const GestionInventarios = () => {
                 {[
                   "#",
                   "Nombre",
-                  "Num de pisos",
-                  "Fecha de creacio",
+                  "Planta",
+                  "Imagen",
                   "Status",
+                  "Fecha de creación",
                   "Editar",
-                  "Espacios",
+                  "Inventarios"
                 ].map((header) => (
                   <TableCell
                     key={header}
@@ -372,55 +384,53 @@ const GestionInventarios = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCategorias
+              {filteredEspacios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((categoria) => (
+                .map((espacio) => (
                   <TableRow
-                    key={categoria.id}
+                    key={espacio.id}
                     sx={{
                       "&:hover": { backgroundColor: "#f5f5f5" },
                       transition: "background-color 0.3s",
                     }}
                   >
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.id}
+                      {espacio.id}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.nombre}
+                      {espacio.nombre}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.numeroPisos}
+                      {espacio.numeroPlanta}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {new Date(categoria.fechaCreacion).toLocaleDateString(
-                        "es-ES",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
+                      {espacio.urlImagen && (
+                        <img
+                          src={espacio.urlImagen}
+                          alt={espacio.nombre}
+                          width="40"
+                          style={{ borderRadius: "5px", cursor: "pointer" }}
+                          onClick={() => handleClickOpen(espacio.urlImagen)}
+                        />
                       )}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Chip
-                        label={categoria.status ? "Activo" : "No activo"}
-                        color={categoria.status ? "success" : "default"}
+                        label={espacio.status ? "Activo" : "Inactivo"}
+                        color={espacio.status ? "success" : "default"}
                         size="small"
-                        onClick={() => handleOpenStatusModal(categoria)}
+                        onClick={() => handleOpenStatusModal(espacio)}
                         style={{ cursor: "pointer" }}
                       />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
+                      {new Date(
+                        espacio.fechaCreacion
+                      ).toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
@@ -429,12 +439,25 @@ const GestionInventarios = () => {
                           color: "white",
                           borderRadius: "50%",
                           padding: "6px",
+                          // marginRight: "5px",
                         }}
-                        onClick={() => navigate(`/gestion-inventarios/espacios/${categoria.id}`)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      </TableCell>
+                      <TableCell sx={{textAlign:"center"}}>
+                      <IconButton
+                        sx={{
+                          backgroundColor: "#133E87",
+                          color: "white",
+                          borderRadius: "50%",
+                          padding: "6px",
+                        }}
+                        onClick={() => navigate(`/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`)}
                       >
                         <ArrowForwardIcon />
                       </IconButton>
-                    </TableCell>
+                      </TableCell>
                   </TableRow>
                 ))}
             </TableBody>
@@ -442,7 +465,7 @@ const GestionInventarios = () => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredCategorias.length}
+            count={filteredEspacios.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -453,7 +476,7 @@ const GestionInventarios = () => {
         {/* Modal para ver imagen */}
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>
-            Imagen de la categoría
+            Imagen del espacio
             <IconButton
               aria-label="close"
               onClick={handleClose}
@@ -476,7 +499,7 @@ const GestionInventarios = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Modal para agregar nueva categoría */}
+        {/* Modal para agregar nuevo espacio */}
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
@@ -484,7 +507,7 @@ const GestionInventarios = () => {
           fullWidth
         >
           <DialogTitle>
-            Agregar Nueva Categoría
+            Agregar Nuevo Espacio
             <IconButton
               aria-label="close"
               onClick={handleCloseAddModal}
@@ -505,7 +528,7 @@ const GestionInventarios = () => {
                 required
                 fullWidth
                 id="nombre"
-                label="Nombre del edificio"
+                label="Nombre del espacio"
                 name="nombre"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
@@ -516,17 +539,50 @@ const GestionInventarios = () => {
                 margin="normal"
                 required
                 fullWidth
-                id="material"
-                label="Numero de pisos"
-                name="material"
-                value={numeroPisos}
-                onChange={(e) => setNumeroPisos(e.target.value)}
+                id="numeroPlanta"
+                label="Número de planta"
+                name="numeroPlanta"
+                value={numeroPlanta}
+                onChange={(e) => setNumeroPlanta(e.target.value)}
+                type="number"
                 inputProps={{
-                  pattern: "[0-9]*", // Permite solo números
-                  inputMode: "numeric", // Muestra un teclado numérico en dispositivos móviles
+                  min: 1,
+                  max: edificio.numeroPisos || 10
                 }}
-                type="number" // También puedes usar type="number", pero puede permitir caracteres adicionales en algunos navegadores
               />
+
+              <input
+                accept="image/*"
+                style={{ display: "none" }}
+                id="contained-button-file"
+                type="file"
+                name="file"
+                onChange={handleFileChange}
+              />
+              <label htmlFor="contained-button-file">
+                <Button
+                  variant="contained"
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ mt: 2, mb: 2 }}
+                >
+                  Subir Imagen
+                </Button>
+              </label>
+              {previewImage && (
+                <Box>
+                  <img
+                    src={previewImage}
+                    alt="Vista previa"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "200px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              )}
+
               <Button
                 type="submit"
                 fullWidth
@@ -560,12 +616,9 @@ const GestionInventarios = () => {
           <DialogContent>
             <Box sx={{ p: 2 }}>
               <Typography variant="body1" gutterBottom>
-                ¿Estás seguro que deseas cambiar el estado de la categoría "
-                {selectedCategoria?.nombre}"?
+                ¿Estás seguro que deseas cambiar el estado del espacio "
+                {selectedEspacio?.nombre}"?
               </Typography>
-              {/* <Typography variant="body2" color="text.secondary" gutterBottom>
-          El estado actual es: {selectedCategoria?.status ? "Activo" : "Inactivo"}
-        </Typography> */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
                 <Button
                   onClick={handleCloseStatusModal}
@@ -593,4 +646,4 @@ const GestionInventarios = () => {
   );
 };
 
-export default GestionInventarios;
+export default Espacios;

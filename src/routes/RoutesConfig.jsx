@@ -14,6 +14,8 @@ import Login from "../pages/Login";
 import NotFoundPage from "../pages/Notfoundpage";
 import Layout from "../components/Layout";
 import Registro from "../pages/Registro";
+import Espacios from "../pages/Espacios";
+import Inventarios from "../pages/Inventarios";
 
 export const RoutesConfig = () => {
   const { user } = useContext(AuthContext);
@@ -31,6 +33,8 @@ export const RoutesConfig = () => {
           <Route path="/responsables" element={<Responsables />} />
           <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/nuevas-cuentas" element={<NuevasCuentas />} />
+          <Route path="/gestion-inventarios/espacios/:id" element={<Espacios/>}/>
+          <Route path="/gestion-inventarios/espacios/:id/inventarios/:id" element={<Inventarios/>}/>
         </Route>
       ) : (
         <>
