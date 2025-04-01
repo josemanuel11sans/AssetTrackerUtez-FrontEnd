@@ -33,19 +33,18 @@ const Registro = () => {
             <div className="box fixed-box">
                 {/* Lado izquierdo: Imagen o ilustración */}
                 <div className="illustration">
-                <img src={logo} alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />
-                <h1 className="title">Forma parte de la familia AssetTracker</h1>
-                </div>
+                    <img src={logo} alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />
+                    <h1 className="title">Accede a tus recursos académicos. ¡Únete ahora!</h1>
+                    </div>
                 {/* Lado derecho: Formulario de registro */}
                 <div className="form-container">
-                <h1 className="title2">Registrarse</h1>
-                <p className="description">Por favor complete el formulario para registrarse</p>
-                <form className="form">
-                        <div className="form-scroll">
+                    <h1 className="title2">Registrarse</h1>
+                    <p className="description">Por favor complete el formulario para registrarse</p>
+                    <form className="form">
                             <div className="input-group">
                                 <label>Nombre:</label>
                                 <div className="input-container">
-                                    <User className="icon" size={20} color="#133E87 " />
+                                    <User className="icon" size={20} color="#aaa" />
                                     <input 
                                         type="text" 
                                         placeholder="Nombre(s)" 
@@ -58,7 +57,7 @@ const Registro = () => {
                             <div className="input-group">
                                 <label>Apellidos:</label>
                                 <div className="input-container">
-                                    <User className="icon" size={20} color="#133E87 " />
+                                    <User className="icon" size={20} color="#aaa" />
                                     <input 
                                         type="text" 
                                         placeholder="Apellidos" 
@@ -71,7 +70,7 @@ const Registro = () => {
                             <div className="input-group">
                                 <label>Correo:</label>
                                 <div className="input-container">
-                                    <Mail className="icon" size={20} color="#133E87 " />
+                                    <Mail className="icon" size={20} color="#aaa" />
                                     <input 
                                         type="email" 
                                         placeholder="ejemplo@utez.edu.mx" 
@@ -84,7 +83,7 @@ const Registro = () => {
                             <div className="input-group">
                                 <label>Contraseña:</label>
                                 <div className="input-container">
-                                    <Lock className="icon" size={20} color="#133E87 " />
+                                    <Lock className="icon" size={20} color="#aaa" />
                                     <input 
                                         type={showPassword ? "text" : "password"} 
                                         placeholder=". . . . . . ." 
@@ -97,14 +96,14 @@ const Registro = () => {
                                         className="eye-button"
                                         onClick={() => setShowPassword(!showPassword)}
                                     >
-                                        {showPassword ? <Eye size={20} color="#133E87" /> : <EyeOff size={20} color="#133E87" />}
+                                        {showPassword ? <Eye size={20} color="#aaa" /> : <EyeOff size={20} color="#aaa" />}
                                     </button>
                                 </div>
                             </div>
                             <div className="input-group">
                                 <label>Rol:</label>
                                 <div className="input-container ">
-                                    <Briefcase className="icon" size={20} color="#133E87 " />
+                                    <Briefcase className="icon" size={20} color="#aaa" />
                                     <select className="select" value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} required>
                                         <option value="" disabled selected>Selecciona un rol</option>
                                         <option value="Administrador">Administrador</option>
@@ -112,18 +111,23 @@ const Registro = () => {
                                     </select>
                                 </div>
                             </div>
-                        </div>
-                        <button type="submit" className="button">
+                        <button type="submit" 
+                            className="button" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                navigate("/");
+                            }}>
                             Registrarse
                         </button>
                         <div className="links">
                             <p>
-                                ¿Ya tienes una cuenta? <a
+                                ¿Ya tienes una cuenta? {" "}
+                                <a
+                                href="#"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     navigate("/");
-                                }}
-                                className="link-button">Iniciar sesión</a>
+                                }}>Iniciar sesión</a>
                             </p>
                         </div>
                     </form>

@@ -22,7 +22,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     width: 125vh;
-    height: 80vh;
+    height: 85vh;
 }
 
 .fixed-box {
@@ -60,8 +60,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-top: 55px;
-    padding-bottom: 55px;
+    padding-top: 50px;
+    padding-bottom: 30px;
 }
 
 .form-scroll {
@@ -81,7 +81,7 @@ body {
 
 
 .title {
-    font-size: 45px;
+    font-size: 40px;
     font-weight: bold;
     color: #FFFFFF;
     position: absolute;
@@ -122,8 +122,8 @@ body {
 .input-group input {
     width: 100%;
     padding: 10px;
-    background-color: #f6f6f6;
-    border: 1px solid #d1d5db;
+    background-color: #F0F0F0;
+    border: 1px solid #F0F0F0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
 }
 
@@ -136,7 +136,7 @@ body {
 .input-container .icon {
     position: absolute;
     left: 10px;
-    color: gray;
+    color: #F0F0F0;
 }
 
 .input-container input {
@@ -159,6 +159,8 @@ body {
 .links a {
     color: #133E87;
     text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
 }
 
 .links a:hover {

@@ -106,8 +106,8 @@ body {
 .input-group input {
     width: 100%;
     padding: 10px;
-    background-color: #f6f6f6;
-    border: 1px solid #d1d5db;
+    background-color: #F0F0F0;
+    border: 1px solid #F0F0F0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
 }
 
@@ -120,7 +120,7 @@ body {
 .input-container .icon {
     position: absolute;
     left: 10px;
-    color: gray;
+    color: #F0F0F0;
 }
 
 .input-container input {
@@ -143,6 +143,8 @@ body {
 .links a {
     color: #133E87;
     text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
 }
 
 .links a:hover {

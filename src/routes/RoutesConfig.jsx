@@ -16,6 +16,9 @@ import Layout from "../components/Layout";
 import Registro from "../pages/Registro";
 import Espacios from "../pages/Espacios";
 import Inventarios from "../pages/Inventarios";
+import RecuperarContrasena from "../pages/RecuperarContrasena";
+import CodigoRecuperacion from "../pages/CodigoRecuperacion";
+import CambioContrasena from "../pages/CambioContrasena";
 
 export const RoutesConfig = () => {
   const { user } = useContext(AuthContext);
@@ -40,6 +43,9 @@ export const RoutesConfig = () => {
         <>
           <Route path="/" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
+          <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
+          <Route path="/codigo-verificacion" element={<CodigoRecuperacion />} />
+          <Route path="/cambio-contrasena" element={<CambioContrasena />} />
         </>
       )}
       <Route path="*" element={<NotFoundPage />} />
