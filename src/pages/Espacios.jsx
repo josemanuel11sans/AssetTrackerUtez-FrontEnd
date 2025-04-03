@@ -8,6 +8,9 @@ import {
   getEdificiosid,
 } from "../api/edificios";
 import {
+  getEspaciosEdificiosid
+} from "../api/espacios";
+import {
   Table,
   TableBody,
   TableCell,
@@ -37,7 +40,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 const Espacios = () => {
   // Estados para la tabla y búsqueda
-  const [edificio, setEdificio] = useState({ espacios: [] });
+  const [edificio, setEdificio] = useState({  });
   const [filteredEspacios, setFilteredEspacios] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -58,16 +61,19 @@ const Espacios = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
-
+  console.log(id+ "id ")
   // Obtener edificio y sus espacios
   useEffect(() => {
     if (!id) return;
-
+    
     const fetchEdificio = async () => {
       try {
-        const response = await getEdificiosid(id);
+        const response = await getEspaciosEdificiosid(id);
+        console.log(response)
         setEdificio(response.data.result);
-        setFilteredEspacios(response.data.result.espacios || []);
+       
+        setFilteredEspacios(response.data.result);
+        console.log(response.data)
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Error al cargar los datos del edificio");
@@ -80,20 +86,23 @@ const Espacios = () => {
     return () => clearInterval(interval);
   }, [id]);
 
+  console.log(edificio.espacio)
   // Filtrar espacios
   useEffect(() => {
+    if (!edificio || !Array.isArray(edificio.espacios)) return;
+  
     let filtered = edificio.espacios.filter((espacio) =>
       espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
+    
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (espacio) => espacio.status === (statusFilter === "active")
       );
     }
-
+    
     setFilteredEspacios(filtered);
-  }, [searchQuery, statusFilter, edificio.espacios]);
+  }, [searchQuery, statusFilter, edificio]);
 
   const handleClickOpen = (imageUrl) => {
     setSelectedImage(imageUrl);
@@ -384,11 +393,13 @@ const Espacios = () => {
               </TableRow>
             </TableHead>
             <TableBody>
+              {console.log(filteredEspacios)}
               {filteredEspacios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((espacio) => (
                   <TableRow
                     key={espacio.id}
+
                     sx={{
                       "&:hover": { backgroundColor: "#f5f5f5" },
                       transition: "background-color 0.3s",

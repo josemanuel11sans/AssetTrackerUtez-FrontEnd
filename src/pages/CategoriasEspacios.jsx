@@ -46,7 +46,7 @@ const CategoriasEspacios = () => {
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState(null);
 
-  // Obtener categorías
+  // Efectos
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
@@ -56,7 +56,6 @@ const CategoriasEspacios = () => {
         if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
           setCategorias(newData);
           setFilteredCategorias(newData);
-          // toast.success("Datos actualizados");
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -65,12 +64,11 @@ const CategoriasEspacios = () => {
     };
 
     fetchCategorias();
-    const interval = setInterval(fetchCategorias, 30000); // Actualizar cada 30 segundos
+    const interval = setInterval(fetchCategorias, 30000);
 
     return () => clearInterval(interval);
   }, [categorias]);
 
-  // Filtrar categorías
   useEffect(() => {
     let filtered = categorias.filter((categoria) =>
       categoria.nombre.toLowerCase().includes(searchQuery.toLowerCase())
@@ -85,7 +83,7 @@ const CategoriasEspacios = () => {
     setFilteredCategorias(filtered);
   }, [searchQuery, statusFilter, categorias]);
 
-  // Manejar paginación
+  // Manejadores de paginación
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -95,7 +93,7 @@ const CategoriasEspacios = () => {
     setPage(0);
   };
 
-  // Manejar modal de categoría
+  // Manejadores del modal de categoría
   const handleOpenModal = (categoria = null) => {
     setCurrentCategoria(categoria);
     if (categoria) {
@@ -113,7 +111,7 @@ const CategoriasEspacios = () => {
     setCurrentCategoria(null);
   };
 
-  // Manejar cambio de estado
+  // Manejadores del modal de estado
   const handleOpenStatusModal = (categoria) => {
     setSelectedCategoria(categoria);
     setOpenStatusModal(true);
@@ -151,24 +149,17 @@ const CategoriasEspacios = () => {
     }
   };
 
-  // Manejar envío del formulario (crear/editar)
+  // Manejador del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Aquí iría la lógica para crear o actualizar la categoría
-      // const response = currentCategoria 
-      //   ? await updateCategoria(currentCategoria.id, nombre, descripcion)
-      //   : await crearCategoria(nombre, descripcion);
-      
-      // toast.success(response.text);
-      // handleCloseModal();
-      // Refrescar datos...
-      
-      toast.success(currentCategoria 
-        ? "Categoría actualizada correctamente" 
-        : "Categoría creada correctamente");
+      toast.success(
+        currentCategoria 
+          ? "Categoría actualizada correctamente" 
+          : "Categoría creada correctamente"
+      );
       handleCloseModal();
     } catch (error) {
       console.error("Error:", error);
