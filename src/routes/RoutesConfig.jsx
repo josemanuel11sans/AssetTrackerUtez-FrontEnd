@@ -19,6 +19,7 @@ import Inventarios from "../pages/Inventarios";
 import RecuperarContrasena from "../pages/RecuperarContrasena";
 import CodigoRecuperacion from "../pages/CodigoRecuperacion";
 import CambioContrasena from "../pages/CambioContrasena";
+import Recursos from "../pages/Recursos";
 
 export const RoutesConfig = () => {
   const { user } = useContext(AuthContext);
@@ -38,6 +39,7 @@ export const RoutesConfig = () => {
           <Route path="/nuevas-cuentas" element={<NuevasCuentas />} />
           <Route path="/gestion-inventarios/espacios/:id" element={<Espacios/>}/>
           <Route path="/gestion-inventarios/espacios/:id/inventarios/:id" element={<Inventarios/>}/>
+          <Route path="/gestion-inventarios/espacios/:id/inventarios/:id/recursos/:id" element={<Recursos/>}/>
         </Route>
       ) : (
         <>

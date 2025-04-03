@@ -5,3 +5,6 @@ const endpoint = "/recursos";
 export const contarRecursos = async () =>{
     return await api.get(`${endpoint}/count`)
 }
+export const getRecursosInventarioId = async (id) =>{
+    return await api.get(`${endpoint}/inventario/${id}`)
+}

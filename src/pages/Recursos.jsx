@@ -1,14 +1,16 @@
-import { useParams } from "react-router-dom";
+
+import { useParams } from "react-router-dom";;
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { Navigate, useNavigate } from "react-router-dom";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+// import {
+//   getEdificios,
+//   chageStatus,
+//   crearEdificio,
+//   getEdificiosid,
+// } from "../api/edificios";
 import {
-  getCategoriasRecursos,
-  crearCategoriaRecursos,
-  chageStatus,
-} from "../api/caregoriasRecursos";
-import { getInventariosEspacios } from "../api/inventarios";
+  getEspaciosEdificiosid
+} from "../api/espacios";
 import {
   Table,
   TableBody,
@@ -32,16 +34,15 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
+import { Navigate, useNavigate } from "react-router-dom";
 
-const Inventarios = () => {
-    const navigate = useNavigate();
-  const { id } = useParams();
-  console.log(id);
+const Recursos = () => {
   // Estados para la tabla y búsqueda
-  const [categorias, setCategorias] = useState([]);
-  const [filteredCategorias, setFilteredCategorias] = useState([]);
+  const [edificio, setEdificio] = useState({  });
+  const [filteredEspacios, setFilteredEspacios] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,27 +52,32 @@ const Inventarios = () => {
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
 
-  // Estados para el modal de agregar categoría
+  // Estados para el modal de agregar espacio
   const [openAddModal, setOpenAddModal] = useState(false);
   const [nombre, setNombre] = useState("");
-  const [material, setMaterial] = useState("");
+  const [numeroPlanta, setNumeroPlanta] = useState("");
   const [file, setFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [showtoas, setShowtoas] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  // const [idInventario,setidInventario] = useState(0);
+  // setidInventario(id);
 
-  // Obtener categorías
+  console.log(id+ "id ")
+  // Obtener edificio y sus espacios
   useEffect(() => {
     if (!id) return;
-
+    
     const fetchEdificio = async () => {
       try {
-        const response = await getInventariosEspacios(id);
-        console.log(response);
-        setCategorias(response.data.result);
-        setFilteredCategorias(response.data.result);
-        console.log(response.data);
+        const response = await getEspaciosEdificiosid(id);
+        console.log(response)
+        setEdificio(response.data.result);
+       
+        setFilteredEspacios(response.data.result);
+        console.log(response.data)
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Error al cargar los datos del edificio");
@@ -84,26 +90,24 @@ const Inventarios = () => {
     return () => clearInterval(interval);
   }, [id]);
 
-  // Filtrar categorías
-  // Filtrar categorías
-  console.log(categorias)
+  console.log(edificio.espacio)
+  // Filtrar espacios
   useEffect(() => {
-    if (!categorias || !Array.isArray(categorias.inventariosGenerdos)) return;
-
-    let filtered = categorias.inventariosGenerdos.filter((categoria) =>
-      categoria.fechaCreacion.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!edificio || !Array.isArray(edificio.espacios)) return;
+  
+    let filtered = edificio.espacios.filter((espacio) =>
+      espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
+    
     if (statusFilter !== "all") {
       filtered = filtered.filter(
-        (categoria) => categoria.status === (statusFilter === "active")
+        (espacio) => espacio.status === (statusFilter === "active")
       );
     }
+    
+    setFilteredEspacios(filtered);
+  }, [searchQuery, statusFilter, edificio]);
 
-    setFilteredCategorias(filtered);
-  }, [searchQuery, statusFilter, categorias]);
-
-  // Manejar imagen seleccionada
   const handleClickOpen = (imageUrl) => {
     setSelectedImage(imageUrl);
     setOpen(true);
@@ -124,8 +128,8 @@ const Inventarios = () => {
     setPage(0);
   };
 
-  // Manejar modal de agregar categoría
-  const handleAddCategory = () => {
+  // Manejar modal de agregar espacio
+  const handleAddSpace = () => {
     setOpenAddModal(true);
   };
 
@@ -137,7 +141,7 @@ const Inventarios = () => {
   // Resetear formulario
   const resetForm = () => {
     setNombre("");
-    setMaterial("");
+    setNumeroPlanta("");
     setFile(null);
     setPreviewImage("");
   };
@@ -151,15 +155,21 @@ const Inventarios = () => {
     }
   };
 
-  // Enviar formulario
-  // Enviar formulario
+  // Enviar formulario para crear nuevo espacio
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      var response = await crearCategoriaRecursos(nombre, material, file);
-      console.log("Respuesta de la API:", response);
+      // Aquí deberías llamar a la API para crear un nuevo espacio
+      // var response = await crearEspacio(id, nombre, numeroPlanta, file);
+      // console.log("Respuesta de la API:", response);
+
+      // Simulando una respuesta exitosa
+      const response = {
+        type: "SUCCESS",
+        text: "Espacio creado correctamente"
+      };
 
       if (response.type === "ERROR") {
         toast.error(response.text);
@@ -170,14 +180,10 @@ const Inventarios = () => {
       }
 
       setOpenAddModal(false);
-      setNombre("");
-      setMaterial("");
-      setFile(null);
-      setPreviewImage("");
+      resetForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al crear categoría");
-      console.error("Error al crear categoría:", error);
-      // Handle the error and display the appropriate toast for the error
+      toast.error(error.response?.data?.message || "Error al crear espacio");
+      console.error("Error al crear espacio:", error);
     } finally {
       setIsLoading(false);
     }
@@ -185,37 +191,45 @@ const Inventarios = () => {
 
   // Estados para el modal de confirmación de cambio de status
   const [openStatusModal, setOpenStatusModal] = useState(false);
-  const [selectedCategoria, setSelectedCategoria] = useState(null);
+  const [selectedEspacio, setSelectedEspacio] = useState(null);
 
   // Función para abrir el modal de confirmación
-  const handleOpenStatusModal = (categoria) => {
-    setSelectedCategoria(categoria);
+  const handleOpenStatusModal = (espacio) => {
+    setSelectedEspacio(espacio);
     setOpenStatusModal(true);
   };
 
   // Función para cerrar el modal de confirmación
   const handleCloseStatusModal = () => {
     setOpenStatusModal(false);
-    setSelectedCategoria(null);
+    setSelectedEspacio(null);
   };
 
   // Función para cambiar el estado
   const handleChangeStatus = async () => {
     try {
-      if (!selectedCategoria) return;
+      if (!selectedEspacio) return;
 
-      const response = await chageStatus(selectedCategoria.id);
+      // Aquí deberías llamar a la API para cambiar el estado
+      // const response = await changeStatusEspacio(selectedEspacio.id);
+
+      // Simulando una respuesta exitosa
+      const response = {
+        type: "SUCCESS",
+        text: "Estado cambiado correctamente"
+      };
 
       if (response.type === "SUCCESS") {
         toast.success(response.text);
         // Actualizar el estado local
-        setCategorias(
-          categorias.map((cat) =>
-            cat.id === selectedCategoria.id
-              ? { ...cat, status: !cat.status }
-              : cat
+        setEdificio(prev => ({
+          ...prev,
+          espacios: prev.espacios.map(esp => 
+            esp.id === selectedEspacio.id 
+              ? { ...esp, status: !esp.status } 
+              : esp
           )
-        );
+        }));
       } else {
         toast.error(response.text || "Error al cambiar el estado");
       }
@@ -223,9 +237,7 @@ const Inventarios = () => {
       handleCloseStatusModal();
     } catch (error) {
       console.error("Error al cambiar el estado:", error);
-      toast.error(
-        error.response?.data?.message || "Error al cambiar el estado"
-      );
+      toast.error(error.response?.data?.message || "Error al cambiar el estado");
       handleCloseStatusModal();
     }
   };
@@ -260,7 +272,7 @@ const Inventarios = () => {
           <SearchIcon style={{ marginRight: "5px" }} />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder="Buscar espacios..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -314,12 +326,12 @@ const Inventarios = () => {
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          inventarios
+          {edificio.nombre} - Espacios
         </Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleAddCategory}
+          onClick={handleAddSpace}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -330,11 +342,11 @@ const Inventarios = () => {
           }}
         >
           <AddIcon sx={{ marginRight: "8px" }} />
-          Agregar categoría
+          Agregar Espacio
         </Button>
       </div>
 
-      {/* Tabla de categorías */}
+      {/* Tabla de espacios */}
       <div
         style={{
           maxWidth: "1350px",
@@ -360,55 +372,80 @@ const Inventarios = () => {
                   zIndex: 1,
                 }}
               >
-                {["#", "fechaCreacion",  "Status", "Editar","Recursos"].map(
-                  (header) => (
-                    <TableCell
-                      key={header}
-                      sx={{
-                        color: "white",
-                        fontWeight: "bold",
-                        textAlign: "center",
-                        padding: "12px 16px",
-                      }}
-                    >
-                      {header}
-                    </TableCell>
-                  )
-                )}
+                {[
+                  "#",
+                  "Nombre",
+                  "Planta",
+                  "Imagen",
+                  "Status",
+                  "Fecha de creación",
+                  "Editar",
+                  "Inventarios"
+                ].map((header) => (
+                  <TableCell
+                    key={header}
+                    sx={{
+                      color: "white",
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      padding: "12px 16px",
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCategorias
+              {console.log(filteredEspacios)}
+              {filteredEspacios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((categoria) => (
+                .map((espacio) => (
                   <TableRow
-                    key={categoria.id}
+                    key={espacio.id}
+
                     sx={{
                       "&:hover": { backgroundColor: "#f5f5f5" },
                       transition: "background-color 0.3s",
                     }}
                   >
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.id}
+                      {espacio.id}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {new Date(categoria.fechaCreacion).toLocaleDateString(
-                        "es-ES",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
+                      {espacio.nombre}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {espacio.numeroPlanta}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {espacio.urlImagen && (
+                        <img
+                          src={espacio.urlImagen}
+                          alt={espacio.nombre}
+                          width="40"
+                          style={{ borderRadius: "5px", cursor: "pointer" }}
+                          onClick={() => handleClickOpen(espacio.urlImagen)}
+                        />
                       )}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Chip
-                        label={categoria.status ? "Activo" : "No activo"}
-                        color={categoria.status ? "success" : "default"}
+                        label={espacio.status ? "Activo" : "Inactivo"}
+                        color={espacio.status ? "success" : "default"}
                         size="small"
-                        onClick={() => handleOpenStatusModal(categoria)}
+                        onClick={() => handleOpenStatusModal(espacio)}
                         style={{ cursor: "pointer" }}
                       />
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {new Date(
+                        espacio.fechaCreacion
+                      ).toLocaleDateString("es-ES", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
@@ -417,12 +454,13 @@ const Inventarios = () => {
                           color: "white",
                           borderRadius: "50%",
                           padding: "6px",
+                          // marginRight: "5px",
                         }}
                       >
                         <EditIcon />
                       </IconButton>
-                    </TableCell>
-                    <TableCell sx={{textAlign:"center"}}>
+                      </TableCell>
+                      <TableCell sx={{textAlign:"center"}}>
                       <IconButton
                         sx={{
                           backgroundColor: "#133E87",
@@ -430,7 +468,7 @@ const Inventarios = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
-                        onClick={() => navigate(`/gestion-inventarios/espacios/${id}/inventarios/${id}/recursos/${categoria.id}`)}
+                        onClick={() => navigate(`/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`)}
                       >
                         <ArrowForwardIcon />
                       </IconButton>
@@ -442,7 +480,7 @@ const Inventarios = () => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredCategorias.length}
+            count={filteredEspacios.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -453,7 +491,7 @@ const Inventarios = () => {
         {/* Modal para ver imagen */}
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>
-            Imagen de la categoría
+            Imagen del espacio
             <IconButton
               aria-label="close"
               onClick={handleClose}
@@ -476,7 +514,7 @@ const Inventarios = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Modal para agregar nueva categoría */}
+        {/* Modal para agregar nuevo espacio */}
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
@@ -484,7 +522,7 @@ const Inventarios = () => {
           fullWidth
         >
           <DialogTitle>
-            Agregar Nueva Categoría
+            Agregar Nuevo Espacio
             <IconButton
               aria-label="close"
               onClick={handleCloseAddModal}
@@ -505,7 +543,7 @@ const Inventarios = () => {
                 required
                 fullWidth
                 id="nombre"
-                label="Nombre de la categoría"
+                label="Nombre del espacio"
                 name="nombre"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
@@ -516,11 +554,16 @@ const Inventarios = () => {
                 margin="normal"
                 required
                 fullWidth
-                id="material"
-                label="Material"
-                name="material"
-                value={material}
-                onChange={(e) => setMaterial(e.target.value)}
+                id="numeroPlanta"
+                label="Número de planta"
+                name="numeroPlanta"
+                value={numeroPlanta}
+                onChange={(e) => setNumeroPlanta(e.target.value)}
+                type="number"
+                inputProps={{
+                  min: 1,
+                  max: edificio.numeroPisos || 10
+                }}
               />
 
               <input
@@ -588,12 +631,9 @@ const Inventarios = () => {
           <DialogContent>
             <Box sx={{ p: 2 }}>
               <Typography variant="body1" gutterBottom>
-                ¿Estás seguro que deseas cambiar el estado de la categoría "
-                {selectedCategoria?.nombre}"?
+                ¿Estás seguro que deseas cambiar el estado del espacio "
+                {selectedEspacio?.nombre}"?
               </Typography>
-              {/* <Typography variant="body2" color="text.secondary" gutterBottom>
-            El estado actual es: {selectedCategoria?.status ? "Activo" : "Inactivo"}
-          </Typography> */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
                 <Button
                   onClick={handleCloseStatusModal}
@@ -621,4 +661,4 @@ const Inventarios = () => {
   );
 };
 
-export default Inventarios;
+export default Recursos;

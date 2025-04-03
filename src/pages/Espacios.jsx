@@ -61,6 +61,9 @@ const Espacios = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
+  // const [idInventario,setidInventario] = useState(0);
+  // setidInventario(id);
+
   console.log(id+ "id ")
   // Obtener edificio y sus espacios
   useEffect(() => {
