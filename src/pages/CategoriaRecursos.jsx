@@ -4,6 +4,7 @@ import {
   getCategoriasRecursos,
   crearCategoriaRecursos,
   chageStatus,
+  updateCategoria
 } from "../api/caregoriasRecursos";
 import {
   Table,
@@ -32,6 +33,12 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
 
 const CategoriaRecursos = () => {
+  // Estados para el modal de edición
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editNombre, setEditNombre] = useState("");
+  const [editMaterial, setEditMaterial] = useState("");
+  const [editCategoria, setEditCategoria] = useState(null);
+
   // Estados para la tabla y búsqueda
   const [categorias, setCategorias] = useState([]);
   const [filteredCategorias, setFilteredCategorias] = useState([]);
@@ -141,6 +148,61 @@ const CategoriaRecursos = () => {
     setMaterial("");
     setFile(null);
     setPreviewImage("");
+  };
+
+  // Función para abrir el modal de edición
+  const handleOpenEditModal = (categoria) => {
+    setEditCategoria(categoria);
+    setEditNombre(categoria.nombre);
+    setEditMaterial(categoria.material);
+    setOpenEditModal(true);
+  };
+
+  // Función para cerrar el modal de edición
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setEditNombre("");
+    setEditMaterial("");
+    setEditCategoria(null);
+  };
+
+  // Función para manejar la edición de la categoría
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+  
+    try {
+      // Llamar a la API para actualizar la categoría
+      const response = await updateCategoria(
+        editCategoria.id, // ID de la categoría
+        editNombre,       // Nombre actualizado
+        editMaterial,     // Material actualizado
+        file              // Archivo de imagen (opcional)
+      );
+  
+      console.log("Respuesta de la API:", response);
+  
+      if (response.type === "SUCCESS") {
+        toast.success("Categoría actualizada correctamente");
+        // Actualizar el estado local
+        setCategorias(
+          categorias.map((cat) =>
+            cat.id === editCategoria.id
+              ? { ...cat, nombre: editNombre, material: editMaterial }
+              : cat
+          )
+        );
+      } else {
+        toast.error(response.text || "Error al actualizar la categoría");
+      }
+  
+      handleCloseEditModal();
+    } catch (error) {
+      console.error("Error al actualizar la categoría:", error);
+      toast.error("Error al actualizar la categoría");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Manejar selección de archivo
@@ -429,6 +491,7 @@ const CategoriaRecursos = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
+                        onClick={() => handleOpenEditModal(categoria)}
                       >
                         <EditIcon />
                       </IconButton>
@@ -802,6 +865,199 @@ const CategoriaRecursos = () => {
             </Box>
           </Box>
         </Dialog>
+
+        <Dialog
+  open={openEditModal}
+  onClose={handleCloseEditModal}
+  PaperProps={{
+    sx: {
+      borderRadius: "16px",
+      boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+      width: "90%",
+      maxWidth: "800px",
+      minWidth: "600px",
+    },
+  }}
+>
+  <Box
+    sx={{
+      position: "relative",
+      bgcolor: "#f8f9fa",
+      p: 3,
+      borderBottom: "2px solid #e9ecef",
+    }}
+  >
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 600,
+        color: "#2b2d42",
+        textAlign: "center",
+        fontSize: "1.8rem",
+      }}
+    >
+      Editar Categoría
+    </Typography>
+
+    <IconButton
+      onClick={handleCloseEditModal}
+      sx={{
+        position: "absolute",
+        right: 24,
+        top: 24,
+        color: "#133e87",
+        "&:hover": {
+          bgcolor: "#dee2e6",
+        },
+      }}
+    >
+      <CloseIcon sx={{ fontSize: "1.8rem" }} />
+    </IconButton>
+  </Box>
+
+  <Box sx={{ p: 3 }}>
+    <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 1 }}>
+      <Box sx={{ mb: 3 }}>
+        <label
+          style={{
+            display: "block",
+            marginBottom: "12px",
+            color: "#133e87",
+            fontWeight: 500,
+            fontSize: "1.1rem",
+          }}
+        >
+          Nombre de la categoría *
+        </label>
+        <input
+          required
+          value={editNombre}
+          onChange={(e) => setEditNombre(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: "10px",
+            border: "2px solid #ced4da",
+            fontSize: "1rem",
+            transition: "all 0.3s",
+          }}
+        />
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <label
+          style={{
+            display: "block",
+            marginBottom: "12px",
+            color: "#133e87",
+            fontWeight: 500,
+            fontSize: "1.1rem",
+          }}
+        >
+          Material *
+        </label>
+        <input
+          required
+          value={editMaterial}
+          onChange={(e) => setEditMaterial(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "14px",
+            borderRadius: "10px",
+            border: "2px solid #ced4da",
+            fontSize: "1rem",
+            transition: "all 0.3s",
+          }}
+        />
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
+        <input
+          accept="image/*"
+          id="edit-file-input"
+          type="file"
+          name="file"
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+        />
+        <label htmlFor="edit-file-input">
+          <Box
+            sx={{
+              border: "2px dashed #ced4da",
+              borderRadius: "10px",
+              p: 4,
+              textAlign: "center",
+              cursor: "pointer",
+              transition: "all 0.3s",
+              "&:hover": {
+                borderColor: "#133e87",
+                backgroundColor: "#f8f0ff",
+              },
+            }}
+          >
+            <CloudUploadIcon
+              sx={{
+                color: "#133e87",
+                fontSize: "2.5rem",
+                mb: 2,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#6c757d",
+                fontWeight: 500,
+                fontSize: "1.1rem",
+              }}
+            >
+              Arrastra o haz clic para subir una imagen
+            </Typography>
+          </Box>
+        </label>
+      </Box>
+
+      {previewImage && (
+        <Box
+          sx={{
+            mb: 3,
+            border: "2px solid #e9ecef",
+            borderRadius: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={previewImage}
+            alt="Vista previa"
+            style={{
+              width: "100%",
+              height: "250px",
+              objectFit: "cover",
+            }}
+          />
+        </Box>
+      )}
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        style={{
+          width: "100%",
+          padding: "16px",
+          backgroundColor: isLoading ? "#133e87" : "#133e87",
+          color: "white",
+          border: "none",
+          borderRadius: "10px",
+          fontSize: "1.1rem",
+          fontWeight: 600,
+          cursor: "pointer",
+          transition: "all 0.3s",
+        }}
+      >
+        {isLoading ? "Guardando..." : "Guardar Cambios"}
+      </button>
+    </Box>
+  </Box>
+</Dialog>
       </div>
 
       {/* Contenedor de Toast */}

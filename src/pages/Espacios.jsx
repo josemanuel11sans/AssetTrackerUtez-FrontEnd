@@ -59,6 +59,12 @@ const Espacios = () => {
   const [previewImage, setPreviewImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Estados para el modal de edición de espacio
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editNombre, setEditNombre] = useState("");
+  const [editNumeroPlanta, setEditNumeroPlanta] = useState("");
+  const [editEspacio, setEditEspacio] = useState(null);
+
   const navigate = useNavigate();
   const { id } = useParams();
   // const [idInventario,setidInventario] = useState(0);
@@ -238,6 +244,54 @@ const Espacios = () => {
       console.error("Error al cambiar el estado:", error);
       toast.error(error.response?.data?.message || "Error al cambiar el estado");
       handleCloseStatusModal();
+    }
+  };
+
+  // Función para abrir el modal de edición
+  const handleOpenEditModal = (espacio) => {
+    setEditEspacio(espacio);
+    setEditNombre(espacio.nombre);
+    setEditNumeroPlanta(espacio.numeroPlanta);
+    setOpenEditModal(true);
+  };
+
+  // Función para cerrar el modal de edición
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setEditNombre("");
+    setEditNumeroPlanta("");
+    setEditEspacio(null);
+  };
+
+  // Función para manejar la edición del espacio
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      console.log("Espacio editado:", {
+        id: editEspacio.id,
+        nombre: editNombre,
+        numeroPlanta: editNumeroPlanta,
+      });
+
+      // Simulación de actualización en el estado local
+      setEdificio((prev) => ({
+        ...prev,
+        espacios: prev.espacios.map((esp) =>
+          esp.id === editEspacio.id
+            ? { ...esp, nombre: editNombre, numeroPlanta: editNumeroPlanta }
+            : esp
+        ),
+      }));
+
+      toast.success("Espacio actualizado correctamente");
+      handleCloseEditModal();
+    } catch (error) {
+      console.error("Error al editar el espacio:", error);
+      toast.error("Error al editar el espacio");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -455,6 +509,7 @@ const Espacios = () => {
                           padding: "6px",
                           // marginRight: "5px",
                         }}
+                        onClick={() => handleOpenEditModal(espacio)}
                       >
                         <EditIcon />
                       </IconButton>
@@ -517,141 +572,444 @@ const Espacios = () => {
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
-          maxWidth="sm"
-          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
         >
-          <DialogTitle>
-            Agregar Nuevo Espacio
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Agregar Nuevo Espacio
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseAddModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="nombre"
-                label="Nombre del espacio"
-                name="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                autoFocus
-              />
+          </Box>
 
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="numeroPlanta"
-                label="Número de planta"
-                name="numeroPlanta"
-                value={numeroPlanta}
-                onChange={(e) => setNumeroPlanta(e.target.value)}
-                type="number"
-                inputProps={{
-                  min: 1,
-                  max: edificio.numeroPisos || 10
-                }}
-              />
-
-              <input
-                accept="image/*"
-                style={{ display: "none" }}
-                id="contained-button-file"
-                type="file"
-                name="file"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="contained-button-file">
-                <Button
-                  variant="contained"
-                  component="span"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ mt: 2, mb: 2 }}
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
                 >
-                  Subir Imagen
-                </Button>
-              </label>
+                  Nombre del espacio *
+                </label>
+                <input
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Número de planta *
+                </label>
+                <input
+                  required
+                  value={numeroPlanta}
+                  onChange={(e) => setNumeroPlanta(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                  type="number"
+                  min={1}
+                  max={edificio.numeroPisos || 10}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <input
+                  accept="image/*"
+                  id="contained-button-file"
+                  type="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="contained-button-file">
+                  <Box
+                    sx={{
+                      border: "2px dashed #ced4da",
+                      borderRadius: "10px",
+                      p: 4,
+                      textAlign: "center",
+                      cursor: "pointer",
+                      transition: "all 0.3s",
+                      "&:hover": {
+                        borderColor: "#133e87",
+                        backgroundColor: "#f8f0ff",
+                      },
+                    }}
+                  >
+                    <CloudUploadIcon
+                      sx={{
+                        color: "#133e87",
+                        fontSize: "2.5rem",
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#6c757d",
+                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      Arrastra o haz clic para subir una imagen
+                    </Typography>
+                  </Box>
+                </label>
+              </Box>
+
               {previewImage && (
-                <Box>
+                <Box
+                  sx={{
+                    mb: 3,
+                    border: "2px solid #e9ecef",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                >
                   <img
                     src={previewImage}
                     alt="Vista previa"
                     style={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
+                      width: "100%",
+                      height: "250px",
                       objectFit: "cover",
                     }}
                   />
                 </Box>
               )}
 
-              <Button
+              <button
                 type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Guardar"}
-              </Button>
+                {isLoading ? "Guardando..." : "Guardar Espacio"}
+              </button>
             </Box>
-          </DialogContent>
+          </Box>
         </Dialog>
 
-        <Dialog open={openStatusModal} onClose={handleCloseStatusModal}>
-          <DialogTitle>
-            Confirmar cambio de estado
+        {/* Modal para editar espacio */}
+        <Dialog
+          open={openEditModal}
+          onClose={handleCloseEditModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Editar Espacio
+            </Typography>
+
             <IconButton
-              aria-label="close"
+              onClick={handleCloseEditModal}
+              sx={{
+                position: "absolute",
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Nombre del espacio *
+                </label>
+                <input
+                  required
+                  value={editNombre}
+                  onChange={(e) => setEditNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Número de planta *
+                </label>
+                <input
+                  required
+                  value={editNumeroPlanta}
+                  onChange={(e) => setEditNumeroPlanta(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                  type="number"
+                />
+              </Box>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
+              >
+                {isLoading ? "Guardando..." : "Guardar Cambios"}
+              </button>
+            </Box>
+          </Box>
+        </Dialog>
+
+        {/* Modal para confirmar cambio de estado */}
+        <Dialog
+          open={openStatusModal}
+          onClose={handleCloseStatusModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "500px",
+              minWidth: "400px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.6rem",
+              }}
+            >
+              Confirmar cambio de estado
+            </Typography>
+
+            <IconButton
               onClick={handleCloseStatusModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.5rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body1" gutterBottom>
-                ¿Estás seguro que deseas cambiar el estado del espacio "
-                {selectedEspacio?.nombre}"?
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#495057",
+                  fontSize: "1.1rem",
+                  lineHeight: 1.5,
+                  textAlign: "center",
+                }}
+              >
+                ¿Estás seguro que deseas cambiar el estado del espacio
+                <span style={{ fontWeight: 600, color: "#2b2d42" }}>
+                  {" "}
+                  "{selectedEspacio?.nombre}"
+                </span>
+                ?
               </Typography>
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-                <Button
-                  onClick={handleCloseStatusModal}
-                  color="primary"
-                  sx={{ mr: 2 }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleChangeStatus}
-                  color="primary"
-                  variant="contained"
-                >
-                  Confirmar
-                </Button>
-              </Box>
             </Box>
-          </DialogContent>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseStatusModal}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  border: "1px solid #ced4da",
+                  borderRadius: "8px",
+                  color: "#6c757d",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleChangeStatus}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  bgcolor: "#133e87",
+                  color: "white",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                    transform: "translateY(-1px)",
+                  },
+                  transition: "all 0.3s",
+                }}
+              >
+                Confirmar
+              </Button>
+            </Box>
+          </Box>
         </Dialog>
+
       </div>
 
       {/* Contenedor de Toast */}

@@ -52,6 +52,12 @@ const GestionInventarios = () => {
   // const [previewImage, setPreviewImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Estados para el modal de editar edificio
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editNombre, setEditNombre] = useState("");
+  const [editNumeroPisos, setEditNumeroPisos] = useState("");
+  const [editEdificio, setEditEdificio] = useState(null);
+
   //para la nevegacion hacia espaccios
   const navigate = useNavigate();
 
@@ -140,7 +146,6 @@ const GestionInventarios = () => {
   // };
 
   // Enviar formulario
-  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -215,6 +220,53 @@ const GestionInventarios = () => {
         error.response?.data?.message || "Error al cambiar el estado"
       );
       handleCloseStatusModal();
+    }
+  };
+
+  // Función para abrir el modal de edición
+  const handleOpenEditModal = (edificio) => {
+    setEditEdificio(edificio);
+    setEditNombre(edificio.nombre);
+    setEditNumeroPisos(edificio.numeroPisos);
+    setOpenEditModal(true);
+  };
+
+  // Función para cerrar el modal de edición
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setEditNombre("");
+    setEditNumeroPisos("");
+    setEditEdificio(null);
+  };
+
+  // Función para manejar la edición del edificio
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      console.log("Edificio editado:", {
+        id: editEdificio.id,
+        nombre: editNombre,
+        numeroPisos: editNumeroPisos,
+      });
+
+      // Simulación de actualización en el estado local
+      setCategorias(
+        categorias.map((cat) =>
+          cat.id === editEdificio.id
+            ? { ...cat, nombre: editNombre, numeroPisos: editNumeroPisos }
+            : cat
+        )
+      );
+
+      toast.success("Edificio actualizado correctamente");
+      handleCloseEditModal();
+    } catch (error) {
+      console.error("Error al editar el edificio:", error);
+      toast.error("Error al editar el edificio");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -418,6 +470,7 @@ const GestionInventarios = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
+                        onClick={() => handleOpenEditModal(categoria)}
                       >
                         <EditIcon />
                       </IconButton>
@@ -476,72 +529,137 @@ const GestionInventarios = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Modal para agregar nueva categoría */}
+        {/* Modal para agregar/editar edificio */}
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
-          maxWidth="sm"
-          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
         >
-          <DialogTitle>
-            Agregar Nueva Categoría
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Agregar Nuevo Edificio
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseAddModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="nombre"
-                label="Nombre del edificio"
-                name="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                autoFocus
-              />
+          </Box>
 
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="material"
-                label="Numero de pisos"
-                name="material"
-                value={numeroPisos}
-                onChange={(e) => setNumeroPisos(e.target.value)}
-                inputProps={{
-                  pattern: "[0-9]*", // Permite solo números
-                  inputMode: "numeric", // Muestra un teclado numérico en dispositivos móviles
-                }}
-                type="number" // También puedes usar type="number", pero puede permitir caracteres adicionales en algunos navegadores
-              />
-              <Button
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Nombre del edificio *
+                </label>
+                <input
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Número de pisos *
+                </label>
+                <input
+                  required
+                  value={numeroPisos}
+                  onChange={(e) => setNumeroPisos(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                  type="number"
+                />
+              </Box>
+
+              <button
                 type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Guardar"}
-              </Button>
+                {isLoading ? "Guardando..." : "Guardar Edificio"}
+              </button>
             </Box>
-          </DialogContent>
+          </Box>
         </Dialog>
 
-                <Dialog
+        {/* Modal para confirmar cambio de estado */}
+        <Dialog
           open={openStatusModal}
           onClose={handleCloseStatusModal}
           PaperProps={{
@@ -601,7 +719,7 @@ const GestionInventarios = () => {
                   textAlign: "center",
                 }}
               >
-                ¿Estás seguro que deseas cambiar el estado de la categoría
+                ¿Estás seguro que deseas cambiar el estado del edificio
                 <span style={{ fontWeight: 600, color: "#2b2d42" }}>
                   {" "}
                   "{selectedCategoria?.nombre}"
@@ -652,6 +770,135 @@ const GestionInventarios = () => {
               >
                 Confirmar
               </Button>
+            </Box>
+          </Box>
+        </Dialog>
+
+        {/* Modal para editar edificio */}
+        <Dialog
+          open={openEditModal}
+          onClose={handleCloseEditModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Editar Edificio
+            </Typography>
+
+            <IconButton
+              onClick={handleCloseEditModal}
+              sx={{
+                position: "absolute",
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Nombre del edificio *
+                </label>
+                <input
+                  required
+                  value={editNombre}
+                  onChange={(e) => setEditNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Número de pisos *
+                </label>
+                <input
+                  required
+                  value={editNumeroPisos}
+                  onChange={(e) => setEditNumeroPisos(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                  type="number"
+                />
+              </Box>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
+              >
+                {isLoading ? "Guardando..." : "Guardar Cambios"}
+              </button>
             </Box>
           </Box>
         </Dialog>

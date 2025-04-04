@@ -43,3 +43,22 @@ export const chageStatus = async (id) => {
     throw error;
   }
 };
+
+export const updateCategoria = async (id, nombre, material, file) => {
+  try {
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("nombre", nombre);
+    formData.append("material", material);
+    if (file) {
+      formData.append("file", file);
+    }
+
+    const response = await api.post(`${endpoint}/update`, formData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar la categoría de recursos:", error);
+    throw error;
+  }
+};
