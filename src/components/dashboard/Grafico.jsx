@@ -1,45 +1,48 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
-import { FaChartBar, FaExpand } from "react-icons/fa" // Importa los íconos FaChartBar y FaExpand
+import { FaChartBar, FaExpand } from "react-icons/fa"
 import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Bar, ResponsiveContainer } from "recharts"
+import { getEdificios } from "../../api/edificios" // Ajusta la ruta según tu proyecto
 
 const Grafico = () => {
   const [openModal, setOpenModal] = useState(false)
+  const [buildingChartData, setBuildingChartData] = useState([])
 
   const handleToggleModal = () => {
     setOpenModal(!openModal)
   }
 
-  const buildingChartData = [
-    { name: "Edificio A", espacios: 15 },
-    { name: "Edificio B", espacios: 10 },
-    { name: "Edificio C", espacios: 20 },
-    { name: "Edificio D", espacios: 5 },
-    { name: "Edificio E", espacios: 12 },
-    { name: "Edificio E", espacios: 11 },
-    { name: "Edificio E", espacios: 110 },
-    { name: "Edificio E", espacios: 19 },
-    { name: "Edificio E", espacios: 30 },
-    { name: "Edificio E", espacios: 12 },
-  ]
+  // 🔁 Cargar datos cuando el componente se monta
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getEdificios()
+        const edificios = response.data.result
+  
+        // Mapear los datos al formato que espera el gráfico
+        const chartData = edificios.map((e) => ({
+          name: e.nombre,
+          espacios: e.numeroPisos // o cualquier otro dato que quieras mostrar
+        }))
+  
+        setBuildingChartData(chartData)
+      } catch (error) {
+        console.error("Error al obtener los edificios:", error)
+      }
+    }
+  
+    fetchData()
+  }, [])
+  
 
   return (
     <>
-      <Paper
-        sx={{
-          p: 3,
-          height: "100%",
-          borderRadius: 0,
-          boxShadow: "none",
-          border: "1px solid #e0e0e0",
-        }}
-      >
+      <Paper sx={{ p: 3, height: "100%", borderRadius: 0, boxShadow: "none", border: "1px solid #e0e0e0" }}>
         <Typography variant="h6" gutterBottom display="flex" alignItems="center" color="#133e87">
-          <FaChartBar size={20} style={{ marginRight: "8px" }} /> {/* Ícono de barras */}
-          Espacios por Edificio
-          {/* Ícono de pantalla completa a la derecha */}
+          <FaChartBar size={20} style={{ marginRight: "8px" }} />
+          Edificios
           <FaExpand size={20} style={{ marginLeft: "auto", cursor: "pointer" }} onClick={handleToggleModal} />
         </Typography>
 
@@ -55,7 +58,6 @@ const Grafico = () => {
         </ResponsiveContainer>
       </Paper>
 
-      {/* Modal de Pantalla Completa */}
       <Dialog
         open={openModal}
         onClose={handleToggleModal}
@@ -77,9 +79,7 @@ const Grafico = () => {
           </ResponsiveContainer>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleToggleModal} color="primary">
-            Cerrar
-          </Button>
+          <Button onClick={handleToggleModal} color="primary">Cerrar</Button>
         </DialogActions>
       </Dialog>
     </>
@@ -87,4 +87,3 @@ const Grafico = () => {
 }
 
 export default Grafico
-
