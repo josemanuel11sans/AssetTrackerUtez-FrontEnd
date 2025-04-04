@@ -8,6 +8,7 @@ import {
   TableRow,
   Paper,
   Box,
+  Chip,
   TablePagination,
   IconButton,
   Typography,
@@ -214,16 +215,14 @@ const Responsables = () => {
                   <TableCell sx={{ textAlign: "center" }}>{responsable.nombre}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>{responsable.divisionAcademica}</TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
-                    <Box
-                      sx={{
-                        width: 16,
-                        height: 16,
-                        borderRadius: "50%",
-                        backgroundColor: responsable.estado ? "green" : "red",
-                        display: "inline-block",
-                      }}
-                    />
-                  </TableCell>
+                      <Chip
+                        label={responsable.estado ? "Activo" : "No activo"}
+                        color={responsable.estado ? "success" : "default"}
+                        size="small"
+                        // onClick={() => handleOpenStatusModal(categoria)}
+                        style={{ cursor: "pointer" }}
+                      />
+                    </TableCell>
                   <TableCell sx={{ textAlign: "center" }}>
                     <IconButton
                       sx={{

@@ -541,49 +541,119 @@ const GestionInventarios = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={openStatusModal} onClose={handleCloseStatusModal}>
-          <DialogTitle>
-            Confirmar cambio de estado
+                <Dialog
+          open={openStatusModal}
+          onClose={handleCloseStatusModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "500px",
+              minWidth: "400px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.6rem",
+              }}
+            >
+              Confirmar cambio de estado
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseStatusModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.5rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body1" gutterBottom>
-                ¿Estás seguro que deseas cambiar el estado de la categoría "
-                {selectedCategoria?.nombre}"?
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#495057",
+                  fontSize: "1.1rem",
+                  lineHeight: 1.5,
+                  textAlign: "center",
+                }}
+              >
+                ¿Estás seguro que deseas cambiar el estado de la categoría
+                <span style={{ fontWeight: 600, color: "#2b2d42" }}>
+                  {" "}
+                  "{selectedCategoria?.nombre}"
+                </span>
+                ?
               </Typography>
-              {/* <Typography variant="body2" color="text.secondary" gutterBottom>
-          El estado actual es: {selectedCategoria?.status ? "Activo" : "Inactivo"}
-        </Typography> */}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-                <Button
-                  onClick={handleCloseStatusModal}
-                  color="primary"
-                  sx={{ mr: 2 }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleChangeStatus}
-                  color="primary"
-                  variant="contained"
-                >
-                  Confirmar
-                </Button>
-              </Box>
             </Box>
-          </DialogContent>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseStatusModal}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  border: "1px solid #ced4da",
+                  borderRadius: "8px",
+                  color: "#6c757d",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleChangeStatus}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  bgcolor: "#133e87",
+                  color: "white",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                    transform: "translateY(-1px)",
+                  },
+                  transition: "all 0.3s",
+                }}
+              >
+                Confirmar
+              </Button>
+            </Box>
+          </Box>
         </Dialog>
       </div>
 

@@ -9,8 +9,8 @@ import { ToastContainer, toast } from "react-toastify";
 //   getEdificiosid,
 // } from "../api/edificios";
 import {
-  getEspaciosEdificiosid
-} from "../api/espacios";
+  getRecursosInventarioId
+} from "../api/recursos";
 import {
   Table,
   TableBody,
@@ -72,7 +72,7 @@ const Recursos = () => {
     
     const fetchEdificio = async () => {
       try {
-        const response = await getEspaciosEdificiosid(id);
+        const response = await getRecursosInventarioId(id);
         console.log(response)
         setEdificio(response.data.result);
        
@@ -326,7 +326,7 @@ const Recursos = () => {
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          {edificio.nombre} - Espacios
+          {edificio.nombre} - Recursos
         </Typography>
         <Button
           variant="contained"
@@ -374,13 +374,14 @@ const Recursos = () => {
               >
                 {[
                   "#",
-                  "Nombre",
-                  "Planta",
-                  "Imagen",
+                  "Codigo",
+                  "Descripcion",
+                  "Marca",
+                  "Modelo",
+                  "Num Serie",
+                  "Observaciones",
                   "Status",
-                  "Fecha de creación",
-                  "Editar",
-                  "Inventarios"
+                "Editar"
                 ].map((header) => (
                   <TableCell
                     key={header}
@@ -413,13 +414,13 @@ const Recursos = () => {
                       {espacio.id}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.nombre}
+                        {espacio.codigo}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.numeroPlanta}
+                      {espacio.descripcion}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.urlImagen && (
+                      {/* {espacio.urlImagen && (
                         <img
                           src={espacio.urlImagen}
                           alt={espacio.nombre}
@@ -427,7 +428,16 @@ const Recursos = () => {
                           style={{ borderRadius: "5px", cursor: "pointer" }}
                           onClick={() => handleClickOpen(espacio.urlImagen)}
                         />
-                      )}
+                      )} */}{espacio.marca}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {espacio.modelo}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {espacio.numeroSerie}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {espacio.observaciones}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Chip
@@ -438,15 +448,7 @@ const Recursos = () => {
                         style={{ cursor: "pointer" }}
                       />
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {new Date(
-                        espacio.fechaCreacion
-                      ).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </TableCell>
+                    
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
                         sx={{
@@ -460,19 +462,7 @@ const Recursos = () => {
                         <EditIcon />
                       </IconButton>
                       </TableCell>
-                      <TableCell sx={{textAlign:"center"}}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                        onClick={() => navigate(`/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`)}
-                      >
-                        <ArrowForwardIcon />
-                      </IconButton>
-                      </TableCell>
+                      
                   </TableRow>
                 ))}
             </TableBody>

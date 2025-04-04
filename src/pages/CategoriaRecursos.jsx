@@ -54,41 +54,40 @@ const CategoriaRecursos = () => {
 
   const [showtoas, setShowtoas] = useState(false);
 
-// Obtener categorías
-useEffect(() => {
-  const fetchCategorias = async () => {
-    try {
-      const response = await getCategoriasRecursos();
-      const newData = response.data.result;
+  // Obtener categorías
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const response = await getCategoriasRecursos();
+        const newData = response.data.result;
 
-      // Verificar si las categorías han cambiado
-      if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
-        setCategorias(newData);
-        setFilteredCategorias(newData);
+        // Verificar si las categorías han cambiado
+        if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
+          setCategorias(newData);
+          setFilteredCategorias(newData);
 
-        // Verificar si ya se mostró el toast para evitar mostrarlo al recargar la página
-        if (!showtoas && !localStorage.getItem('toastShown')) {
-          toast.success("Nuevos datos cargados");
+          // Verificar si ya se mostró el toast para evitar mostrarlo al recargar la página
+          if (!showtoas && !localStorage.getItem("toastShown")) {
+            toast.success("Nuevos datos cargados");
+            setShowtoas(true);
+            localStorage.setItem("toastShown", "true"); // Marcar que ya se mostró el toast
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        if (!showtoas && !localStorage.getItem("toastShown")) {
+          toast.error("Error al cargar las categorias.");
           setShowtoas(true);
-          localStorage.setItem('toastShown', 'true');  // Marcar que ya se mostró el toast
+          localStorage.setItem("toastShown", "true"); // Marcar que ya se mostró el toast
         }
       }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      if (!showtoas && !localStorage.getItem('toastShown')) {
-        toast.error("Error al cargar las categorias.");
-        setShowtoas(true);
-        localStorage.setItem('toastShown', 'true');  // Marcar que ya se mostró el toast
-      }
-    }
-  };
+    };
 
-  fetchCategorias();
-  const interval = setInterval(fetchCategorias, 5000);
+    fetchCategorias();
+    const interval = setInterval(fetchCategorias, 5000);
 
-  return () => clearInterval(interval);
-}, [categorias, showtoas]);
-
+    return () => clearInterval(interval);
+  }, [categorias, showtoas]);
 
   // Filtrar categorías
   useEffect(() => {
@@ -479,138 +478,329 @@ useEffect(() => {
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
-          maxWidth="sm"
-          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
         >
-          <DialogTitle>
-            Agregar Nueva Categoría
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Nueva Categoría
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseAddModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 24,
+                top: 24,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="nombre"
-                label="Nombre de la categoría"
-                name="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                autoFocus
-              />
+          </Box>
 
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="material"
-                label="Material"
-                name="material"
-                value={material}
-                onChange={(e) => setMaterial(e.target.value)}
-              />
-
-              <input
-                accept="image/*"
-                style={{ display: "none" }}
-                id="contained-button-file"
-                type="file"
-                name="file"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="contained-button-file">
-                <Button
-                  variant="contained"
-                  component="span"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ mt: 2, mb: 2 }}
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
                 >
-                  Subir Imagen
-                </Button>
-              </label>
+                  Nombre de la categoría *
+                </label>
+                <input
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                  sx={{
+                    "&:focus": {
+                      outline: "none",
+                      borderColor: "#9d4edd",
+                      boxShadow: "0 0 0 3px rgba(157, 78, 221, 0.1)",
+                    },
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Material *
+                </label>
+                <input
+                  required
+                  value={material}
+                  onChange={(e) => setMaterial(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                  sx={{
+                    "&:focus": {
+                      outline: "none",
+                      borderColor: "#9d4edd",
+                      boxShadow: "0 0 0 3px rgba(157, 78, 221, 0.1)",
+                    },
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <input
+                  accept="image/*"
+                  id="contained-button-file"
+                  type="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="contained-button-file">
+                  <Box
+                    sx={{
+                      border: "2px dashed #ced4da",
+                      borderRadius: "10px",
+                      p: 4,
+                      textAlign: "center",
+                      cursor: "pointer",
+                      transition: "all 0.3s",
+                      "&:hover": {
+                        borderColor: "#133e87",
+                        backgroundColor: "#f8f0ff",
+                      },
+                    }}
+                  >
+                    <CloudUploadIcon
+                      sx={{
+                        color: "#133e87",
+                        fontSize: "2.5rem",
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#6c757d",
+                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      Arrastra o haz clic para subir una imagen
+                    </Typography>
+                  </Box>
+                </label>
+              </Box>
+
               {previewImage && (
-                <Box>
+                <Box
+                  sx={{
+                    mb: 3,
+                    border: "2px solid #e9ecef",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                >
                   <img
                     src={previewImage}
                     alt="Vista previa"
                     style={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
+                      width: "100%",
+                      height: "250px",
                       objectFit: "cover",
                     }}
                   />
                 </Box>
               )}
 
-              <Button
+              <button
                 type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
+                sx={{
+                  "&:hover:not(:disabled)": {
+                    backgroundColor: "#7b2cbf",
+                    transform: "translateY(-1px)",
+                  },
+                }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Guardar"}
-              </Button>
+                {isLoading ? "Guardando..." : "Guardar Categoría"}
+              </button>
             </Box>
-          </DialogContent>
+          </Box>
         </Dialog>
 
-        <Dialog open={openStatusModal} onClose={handleCloseStatusModal}>
-          <DialogTitle>
-            Confirmar cambio de estado
+        <Dialog
+          open={openStatusModal}
+          onClose={handleCloseStatusModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "500px",
+              minWidth: "400px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.6rem",
+              }}
+            >
+              Confirmar cambio de estado
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseStatusModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.5rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="body1" gutterBottom>
-                ¿Estás seguro que deseas cambiar el estado de la categoría "
-                {selectedCategoria?.nombre}"?
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#495057",
+                  fontSize: "1.1rem",
+                  lineHeight: 1.5,
+                  textAlign: "center",
+                }}
+              >
+                ¿Estás seguro que deseas cambiar el estado de la categoría
+                <span style={{ fontWeight: 600, color: "#2b2d42" }}>
+                  {" "}
+                  "{selectedCategoria?.nombre}"
+                </span>
+                ?
               </Typography>
-              {/* <Typography variant="body2" color="text.secondary" gutterBottom>
-          El estado actual es: {selectedCategoria?.status ? "Activo" : "Inactivo"}
-        </Typography> */}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-                <Button
-                  onClick={handleCloseStatusModal}
-                  color="primary"
-                  sx={{ mr: 2 }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleChangeStatus}
-                  color="primary"
-                  variant="contained"
-                >
-                  Confirmar
-                </Button>
-              </Box>
             </Box>
-          </DialogContent>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseStatusModal}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  border: "1px solid #ced4da",
+                  borderRadius: "8px",
+                  color: "#6c757d",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleChangeStatus}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  bgcolor: "#133e87",
+                  color: "white",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                    transform: "translateY(-1px)",
+                  },
+                  transition: "all 0.3s",
+                }}
+              >
+                Confirmar
+              </Button>
+            </Box>
+          </Box>
         </Dialog>
       </div>
 

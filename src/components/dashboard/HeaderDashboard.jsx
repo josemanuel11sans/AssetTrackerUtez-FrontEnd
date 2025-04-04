@@ -25,7 +25,7 @@ const HeaderDashboard = () => {
           ASSETTRACKER UTEZ
         </samp>
 
-        <Box sx={{ display: "flex", gap: 2 }}>
+        {/* <Box sx={{ display: "flex", gap: 2 }}>
           <Button
             variant="contained"
             startIcon={<Plus size={18} />}
@@ -57,7 +57,7 @@ const HeaderDashboard = () => {
           >
             Buscar
           </Button>
-        </Box>
+        </Box> */}
       </Paper>
     </Grid>
   )

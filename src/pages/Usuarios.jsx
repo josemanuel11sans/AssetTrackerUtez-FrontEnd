@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   Box,
+  Chip,
   TablePagination,
   IconButton,
   Typography,
@@ -154,9 +155,23 @@ const Usuarios = () => {
           </select>
         </div>
       </div>
-      
-      <div style={{ marginBottom: "10px", padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h5" align="left" color="#133e87" fontFamily={'sans-serif'} fontSize={30}>
+
+      <div
+        style={{
+          marginBottom: "10px",
+          padding: "10px 20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="h5"
+          align="left"
+          color="#133e87"
+          fontFamily={"sans-serif"}
+          fontSize={30}
+        >
           Usuarios
         </Typography>
         <Button
@@ -176,8 +191,15 @@ const Usuarios = () => {
           Agregar usuario
         </Button>
       </div>
-      
-      <div style={{ maxWidth: "1350px", margin: "auto", textAlign: "center", padding: "0 20px" }}>
+
+      <div
+        style={{
+          maxWidth: "1350px",
+          margin: "auto",
+          textAlign: "center",
+          padding: "0 20px",
+        }}
+      >
         <TableContainer
           component={Paper}
           sx={{
@@ -195,7 +217,14 @@ const Usuarios = () => {
                   zIndex: 1,
                 }}
               >
-                {["ID", "Nombre", "Correo", "Tipo de usuario","Estado", "Acciones"].map((header) => (
+                {[
+                  "ID",
+                  "Nombre",
+                  "Correo",
+                  "Tipo de usuario",
+                  "Estado",
+                  "Acciones",
+                ].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
@@ -221,19 +250,27 @@ const Usuarios = () => {
                       transition: "background-color 0.3s",
                     }}
                   >
-                    <TableCell sx={{ textAlign: "center" }}>{usuario.id}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{usuario.nombre} {usuario.apellidos}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{usuario.correo}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{usuario.rol === "ROLE_ADMIN_ACCESS" ? "Administrador" : "Inspector"}</TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      <Box
-                        sx={{
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          backgroundColor: usuario.estado ? "green" : "red",
-                          display: "inline-block",
-                        }}
+                      {usuario.id}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {usuario.nombre} {usuario.apellidos}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {usuario.correo}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {usuario.rol === "ROLE_ADMIN_ACCESS"
+                        ? "Administrador"
+                        : "Inspector"}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Chip
+                        label={usuario.estado ? "Activo" : "No activo"}
+                        color={usuario.estado ? "success" : "default"}
+                        size="small"
+                        // onClick={() => handleOpenStatusModal(categoria)}
+                        style={{ cursor: "pointer" }}
                       />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
