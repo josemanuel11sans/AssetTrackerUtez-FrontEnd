@@ -65,28 +65,13 @@ const CategoriaRecursos = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await getCategoriasRecursos();
-        const newData = response.data.result;
-
-        // Verificar si las categorías han cambiado
-        if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
-          setCategorias(newData);
-          setFilteredCategorias(newData);
-
-          // Verificar si ya se mostró el toast para evitar mostrarlo al recargar la página
-          if (!showtoas && !localStorage.getItem("toastShown")) {
-            toast.success("Nuevos datos cargados");
-            setShowtoas(true);
-            localStorage.setItem("toastShown", "true"); // Marcar que ya se mostró el toast
-          }
-        }
+        const newData = await getCategoriasRecursos();
+        setCategorias(newData);
+        setFilteredCategorias(newData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        if (!showtoas && !localStorage.getItem("toastShown")) {
-          toast.error("Error al cargar las categorias.");
-          setShowtoas(true);
-          localStorage.setItem("toastShown", "true"); // Marcar que ya se mostró el toast
-        }
+        setCategorias([]);
+        setFilteredCategorias([]);
       }
     };
 
@@ -94,7 +79,7 @@ const CategoriaRecursos = () => {
     const interval = setInterval(fetchCategorias, 5000);
 
     return () => clearInterval(interval);
-  }, [categorias, showtoas]);
+  }, []);
 
   // Filtrar categorías
   useEffect(() => {
@@ -170,36 +155,17 @@ const CategoriaRecursos = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-  
+
     try {
-      // Llamar a la API para actualizar la categoría
-      const response = await updateCategoria(
-        editCategoria.id, // ID de la categoría
-        editNombre,       // Nombre actualizado
-        editMaterial,     // Número de pisos actualizado
-        file              // Archivo de imagen (opcional)
-      );
-  
-      console.log("Respuesta de la API:", response);
-  
-      if (response.type === "SUCCESS") {
-        toast.success("Categoría actualizada correctamente");
-        // Actualizar el estado local
-        setCategorias(
-          categorias.map((cat) =>
-            cat.id === editCategoria.id
-              ? { ...cat, nombre: editNombre, numeroPisos: editMaterial }
-              : cat
-          )
-        );
-      } else {
-        toast.error(response.text || "Error al actualizar la categoría");
-      }
-  
+      const updatedCategorias = await updateCategoria(editCategoria.id, editNombre, editMaterial, file);
+      setCategorias(updatedCategorias);
+      setFilteredCategorias(updatedCategorias);
+
+      toast.success("Categoría actualizada correctamente");
       handleCloseEditModal();
     } catch (error) {
-      console.error("Error al actualizar la categoría:", error);
       toast.error("Error al actualizar la categoría");
+      console.error("Error al actualizar la categoría:", error);
     } finally {
       setIsLoading(false);
     }
@@ -215,32 +181,21 @@ const CategoriaRecursos = () => {
   };
 
   // Enviar formulario
-  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      var response = await crearCategoriaRecursos(nombre, material, file);
-      console.log("Respuesta de la API:", response);
+      const updatedCategorias = await crearCategoriaRecursos(nombre, material, file);
+      setCategorias(updatedCategorias);
+      setFilteredCategorias(updatedCategorias);
 
-      if (response.type === "ERROR") {
-        toast.error(response.text);
-      } else if (response.type === "SUCCESS") {
-        toast.success(response.text);
-      } else if (response.type === "WARNING") {
-        toast.warning(response.text);
-      }
-
+      toast.success("Categoría creada correctamente");
       setOpenAddModal(false);
-      setNombre("");
-      setMaterial("");
-      setFile(null);
-      setPreviewImage("");
+      resetForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al crear categoría");
-      console.error("Error al crear categoría:", error);
-      // Handle the error and display the appropriate toast for the error
+      toast.error("Error al crear la categoría");
+      console.error("Error al crear la categoría:", error);
     } finally {
       setIsLoading(false);
     }
@@ -265,31 +220,15 @@ const CategoriaRecursos = () => {
   // Función para cambiar el estado
   const handleChangeStatus = async () => {
     try {
-      if (!selectedCategoria) return;
+      const updatedCategorias = await chageStatus(selectedCategoria.id);
+      setCategorias(updatedCategorias);
+      setFilteredCategorias(updatedCategorias);
 
-      const response = await chageStatus(selectedCategoria.id);
-
-      if (response.type === "SUCCESS") {
-        toast.success(response.text);
-        // Actualizar el estado local
-        setCategorias(
-          categorias.map((cat) =>
-            cat.id === selectedCategoria.id
-              ? { ...cat, status: !cat.status }
-              : cat
-          )
-        );
-      } else {
-        toast.error(response.text || "Error al cambiar el estado");
-      }
-
+      toast.success("Estado de la categoría actualizado correctamente");
       handleCloseStatusModal();
     } catch (error) {
+      toast.error("Error al cambiar el estado de la categoría");
       console.error("Error al cambiar el estado:", error);
-      toast.error(
-        error.response?.data?.message || "Error al cambiar el estado"
-      );
-      handleCloseStatusModal();
     }
   };
 
@@ -446,58 +385,59 @@ const CategoriaRecursos = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCategorias
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((categoria) => (
-                  <TableRow
-                    key={categoria.id}
-                    sx={{
-                      "&:hover": { backgroundColor: "#f5f5f5" },
-                      transition: "background-color 0.3s",
-                    }}
-                  >
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.id}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.nombre}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.material}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <img
-                        src={categoria.imagenUrl}
-                        alt={categoria.nombre}
-                        width="40"
-                        style={{ borderRadius: "5px", cursor: "pointer" }}
-                        onClick={() => handleClickOpen(categoria.imagenUrl)}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Chip
-                        label={categoria.status ? "Activo" : "No activo"}
-                        color={categoria.status ? "success" : "default"}
-                        size="small"
-                        onClick={() => handleOpenStatusModal(categoria)}
-                        style={{ cursor: "pointer" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                        onClick={() => handleOpenEditModal(categoria)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+              {Array.isArray(filteredCategorias) &&
+                filteredCategorias
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((categoria, index) => (
+                    <TableRow
+                      key={categoria.id}
+                      sx={{
+                        "&:hover": { backgroundColor: "#f5f5f5" },
+                        transition: "background-color 0.3s",
+                      }}
+                    >
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {page * rowsPerPage + index + 1} {/* Muestra la numeración */}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {categoria.nombre}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {categoria.material}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <img
+                          src={categoria.imagenUrl}
+                          alt={categoria.nombre}
+                          width="40"
+                          style={{ borderRadius: "5px", cursor: "pointer" }}
+                          onClick={() => handleClickOpen(categoria.imagenUrl)}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Chip
+                          label={categoria.status ? "Activo" : "No activo"}
+                          color={categoria.status ? "success" : "default"}
+                          size="small"
+                          onClick={() => handleOpenStatusModal(categoria)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <IconButton
+                          sx={{
+                            backgroundColor: "#133E87",
+                            color: "white",
+                            borderRadius: "50%",
+                            padding: "6px",
+                          }}
+                          onClick={() => handleOpenEditModal(categoria)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
           <TablePagination

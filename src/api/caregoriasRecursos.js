@@ -3,8 +3,15 @@ import api from "./api";
 const endpoint = "categoriasRecursos";
 
 export const getCategoriasRecursos = async () => {
-  return await api.get(`${endpoint}/all`);
+  try {
+    const response = await api.get(`${endpoint}/all`);
+    return Array.isArray(response.data.result) ? response.data.result : []; // Devuelve un array vacío si no es válido
+  } catch (error) {
+    console.error("Error al obtener las categorías de recursos:", error);
+    return []; // Devuelve un array vacío en caso de error
+  }
 };
+
 export const crearCategoriaRecursos = async (nombre, material, file) => {
   try {
     const formData = new FormData();
@@ -17,29 +24,20 @@ export const crearCategoriaRecursos = async (nombre, material, file) => {
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+    return Array.isArray(response.data.result) ? response.data.result : []; // Devuelve las categorías actualizadas
   } catch (error) {
-    console.error("Error al crear la categoría de recursos:");
+    console.error("Error al crear la categoría de recursos:", error);
     throw error;
   }
 };
+
 export const chageStatus = async (id) => {
   try {
-    const response = await api.put(
-      `${endpoint}/status`,
-      { id },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`
-        },
-      }
-    );
-    return response.data;
+    const payload = { id };
+    const response = await api.put(`/categoriasRecursos/status`, payload);
+    return Array.isArray(response.data.result) ? response.data.result : []; // Devuelve las categorías actualizadas
   } catch (error) {
-    console.error(
-      "Error al cambiar el estado de la categoría de recursos:",
-      error
-    );
+    console.error("Error al cambiar el estado de la categoría:", error);
     throw error;
   }
 };
@@ -50,13 +48,19 @@ export const updateCategoria = async (id, nombre, material, file) => {
     formData.append("id", id);
     formData.append("nombre", nombre);
     formData.append("material", material);
-    if (file) {
+ 
       formData.append("file", file);
-    }
+    
 
-    const response = await api.post(`${endpoint}/update`, formData);
-
-    return response.data;
+    const response = await api.post(`${endpoint}/update`, formData,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return Array.isArray(response.data.result) ? response.data.result : []; // Devuelve las categorías actualizadas
   } catch (error) {
     console.error("Error al actualizar la categoría de recursos:", error);
     throw error;

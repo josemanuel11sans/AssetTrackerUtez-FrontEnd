@@ -17,10 +17,12 @@ import {
   Typography,
   Button,
 } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import { getUsuarios } from "../api/usuariosApi";
+import CloseIcon from "@mui/icons-material/Close";
+import { getUsuarios, saveUsuario, updateUsuario, changeStatusUsuario } from "../api/usuariosApi";
 
 const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -30,12 +32,22 @@ const Usuarios = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [currentUsuario, setCurrentUsuario] = useState(null);
+  const [nombre, setNombre] = useState("");
+  const [apellidos, setApellidos] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [rolId, setRolId] = useState(1);
+  const [contrasena, setContrasena] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [selectedUsuario, setSelectedUsuario] = useState(null);
 
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await getUsuarios(); // Use the imported API function
+        const response = await getUsuarios();
         const newData = response.data.result;
 
         if (JSON.stringify(newData) !== JSON.stringify(usuarios)) {
@@ -87,7 +99,93 @@ const Usuarios = () => {
   };
 
   const handleAddUser = () => {
-    console.log("Agregar nuevo usuario");
+    setCurrentUsuario(null);
+    setNombre("");
+    setApellidos("");
+    setCorreo("");
+    setRolId(1);
+    setContrasena("");
+    setOpenAddModal(true);
+  };
+
+  const handleEditUser = (usuario) => {
+    setCurrentUsuario(usuario);
+    setNombre(usuario.nombre);
+    setApellidos(usuario.apellidos);
+    setCorreo(usuario.correo);
+    setRolId(usuario.rolId);
+    setContrasena("");
+    setOpenAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setOpenAddModal(false);
+    setCurrentUsuario(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        id: currentUsuario?.id,
+        nombre,
+        apellidos,
+        correo,
+        contrasena,
+        rol: rolId === 1 ? "ROLE_ADMIN_ACCESS" : "ROLE_INSPECTOR_ACCESS",
+      };
+
+      if (currentUsuario) {
+        await updateUsuario(payload);
+        toast.success("Usuario actualizado correctamente");
+      } else {
+        await saveUsuario(payload);
+        toast.success("Usuario creado correctamente. Recuerde activarlo posteriormente.");
+      }
+      setOpenAddModal(false);
+    } catch (error) {
+      toast.error("Error al guardar el usuario");
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOpenStatusModal = (usuario) => {
+    setSelectedUsuario(usuario);
+    setOpenStatusModal(true);
+  };
+
+  const handleCloseStatusModal = () => {
+    setOpenStatusModal(false);
+    setSelectedUsuario(null);
+  };
+
+  const handleConfirmChangeStatus = async () => {
+    try {
+      const response = await changeStatusUsuario(selectedUsuario.id);
+      console.log(response);
+
+      if (response.data.type === "SUCCESS") {
+        toast.success("Estado del usuario actualizado correctamente");
+        setUsuarios(
+          usuarios.map((u) =>
+            u.id === selectedUsuario.id ? { ...u, estado: !u.estado } : u
+          )
+        );
+      } else if (response.data.type === "ERROR") {
+        toast.error(response.text || "Error al cambiar el estado del usuario");
+      } else {
+        toast.warning(response.text || "Advertencia al cambiar el estado del usuario");
+      }
+    } catch (error) {
+      console.error("Error al cambiar el estado del usuario:", error);
+      toast.error("Error al cambiar el estado del usuario");
+    } finally {
+      handleCloseStatusModal();
+    }
   };
 
   return (
@@ -269,7 +367,7 @@ const Usuarios = () => {
                         label={usuario.estado ? "Activo" : "No activo"}
                         color={usuario.estado ? "success" : "default"}
                         size="small"
-                        // onClick={() => handleOpenStatusModal(categoria)}
+                        onClick={() => handleOpenStatusModal(usuario)}
                         style={{ cursor: "pointer" }}
                       />
                     </TableCell>
@@ -281,6 +379,7 @@ const Usuarios = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
+                        onClick={() => handleEditUser(usuario)}
                       >
                         <EditIcon />
                       </IconButton>
@@ -310,6 +409,334 @@ const Usuarios = () => {
             />
           </DialogContent>
         </Dialog>
+
+        <Dialog
+          open={openAddModal}
+          onClose={handleCloseAddModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              {currentUsuario ? "Editar Usuario" : "Agregar Usuario"}
+            </Typography>
+
+            <IconButton
+              onClick={handleCloseAddModal}
+              sx={{
+                position: "absolute",
+                right: 24,
+                top: 24,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Nombre *
+                </label>
+                <input
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Apellidos *
+                </label>
+                <input
+                  required
+                  value={apellidos}
+                  onChange={(e) => setApellidos(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Correo *
+                </label>
+                <input
+                  required
+                  type="email"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Contraseña *
+                </label>
+                <input
+                  required
+                  type="password"
+                  value={contrasena}
+                  onChange={(e) => setContrasena(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Rol *
+                </label>
+                <select
+                  value={rolId}
+                  onChange={(e) => setRolId(Number(e.target.value))}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  <option value={1}>Administrador</option>
+                  <option value={2}>Inspector</option>
+                </select>
+              </Box>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
+              >
+                {isLoading ? "Guardando..." : "Guardar Usuario"}
+              </button>
+            </Box>
+          </Box>
+        </Dialog>
+
+        <Dialog
+          open={openStatusModal}
+          onClose={handleCloseStatusModal}
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "500px",
+              minWidth: "400px",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.6rem",
+              }}
+            >
+              Confirmar cambio de estado
+            </Typography>
+
+            <IconButton
+              onClick={handleCloseStatusModal}
+              sx={{
+                position: "absolute",
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "1.5rem" }} />
+            </IconButton>
+          </Box>
+
+          <Box sx={{ p: 3 }}>
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#495057",
+                  fontSize: "1.1rem",
+                  lineHeight: 1.5,
+                  textAlign: "center",
+                }}
+              >
+                ¿Estás seguro que deseas cambiar el estado del usuario
+                <span style={{ fontWeight: 600, color: "#2b2d42" }}>
+                  {" "}
+                  "{selectedUsuario?.nombre} {selectedUsuario?.apellidos}"
+                </span>
+                ?
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                mt: 3,
+              }}
+            >
+              <Button
+                onClick={handleCloseStatusModal}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  border: "1px solid #ced4da",
+                  borderRadius: "8px",
+                  color: "#6c757d",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                  },
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmChangeStatus}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  bgcolor: "#133e87",
+                  color: "white",
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  "&:hover": {
+                    bgcolor: "#133e87",
+                    transform: "translateY(-1px)",
+                  },
+                  transition: "all 0.3s",
+                }}
+              >
+                Confirmar
+              </Button>
+            </Box>
+          </Box>
+        </Dialog>
+        <ToastContainer />
       </div>
     </>
   );

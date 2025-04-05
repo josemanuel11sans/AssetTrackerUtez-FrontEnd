@@ -23,3 +23,35 @@ try{
       throw error;
 }
 }
+
+export const saveCategoriaEspacio = async (nombre, descripcion) => {
+  try {
+    const payload = { nombre, descripcion };
+    const response = await api.post(`${endpoint}/save`, payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al guardar la categoría de espacios:", error);
+    throw error;
+  }
+};
+
+export const updateCategoriaEspacio = async (id, nombre, descripcion) => {
+  try {
+    const payload = { id, nombre, descripcion };
+    const response = await api.put(`${endpoint}/update`, payload, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar la categoría de espacios:", error);
+    throw error;
+  }
+};

@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
-import { getEdificios, chageStatus, crearEdificio } from "../api/edificios";
-// import { crearCategoriaRecursos } from "../api/caregoriasRecursos";
 import {
   Table,
   TableBody,
@@ -19,92 +16,61 @@ import {
   Typography,
   Button,
   Chip,
-  TextField,
-  CircularProgress,
 } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-// import LinkIcon from "@mui/icons-material/Link";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
-import { Navigate, useNavigate } from "react-router-dom";
+import { getInventarios, saveInventario, updateInventario, changeStatusInventario } from "../api/edificios";
 
 const GestionInventarios = () => {
-  // Estados para la tabla y búsqueda
-  const [categorias, setCategorias] = useState([]);
-  const [filteredCategorias, setFilteredCategorias] = useState([]);
+  const [inventarios, setInventarios] = useState([]);
+  const [filteredInventarios, setFilteredInventarios] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active");
-
-  // Estados para el modal de imagen
-  const [open, setOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
-
-  // Estados para el modal de agregar categoría
+  const [statusFilter, setStatusFilter] = useState("all");
   const [openAddModal, setOpenAddModal] = useState(false);
+  const [currentInventario, setCurrentInventario] = useState(null);
   const [nombre, setNombre] = useState("");
   const [numeroPisos, setNumeroPisos] = useState("");
-  // const [file, setFile] = useState(null);
-  // const [previewImage, setPreviewImage] = useState("");
+  const [imagen, setImagen] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [selectedInventario, setSelectedInventario] = useState(null);
 
-  //para la nevegacion hacia espaccios
-  const navigate = useNavigate();
-
-  // Estados para notificaciones
-  // const [showtoas, setShowtoas] = useState(false);
-
-  // Obtener edificios
   useEffect(() => {
-    const fetchCategorias = async () => {
+    const fetchInventarios = async () => {
       try {
-        const response = await getEdificios();
+        const response = await getInventarios();
         const newData = response.data.result;
-        // Verificar si las categorías han cambiado
-        if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
-          setCategorias(newData);
-          setFilteredCategorias(newData);
-        }
+        setInventarios(newData);
+        setFilteredInventarios(newData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        // if (!showtoas) {
-        //   // toast.error("Error al cargar las categorias.");
-        //   // setShowtoas(true);
-        // }
+        toast.error("Error al cargar los inventarios");
       }
     };
 
-    fetchCategorias();
-    const interval = setInterval(fetchCategorias, 5000);
+    fetchInventarios();
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [categorias]);
-
-  // Filtrar categorías
   useEffect(() => {
-    let filtered = categorias.filter((categoria) =>
-      categoria.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = inventarios.filter((inventario) =>
+      inventario.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (statusFilter !== "all") {
       filtered = filtered.filter(
-        (categoria) => categoria.status === (statusFilter === "active")
+        (inventario) => inventario.estado === (statusFilter === "active")
       );
     }
 
-    setFilteredCategorias(filtered);
-  }, [searchQuery, statusFilter, categorias]);
+    setFilteredInventarios(filtered);
+  }, [searchQuery, statusFilter, inventarios]);
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedImage("");
-  };
-
-  // Manejar paginación
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -114,113 +80,93 @@ const GestionInventarios = () => {
     setPage(0);
   };
 
-  // Manejar modal de agregar categoría
-  const handleAddCategory = () => {
+  const handleAddInventario = () => {
+    setCurrentInventario(null);
+    setNombre("");
+    setNumeroPisos("");
+    setImagen(null);
+    setPreviewImage(null);
+    setOpenAddModal(true);
+  };
+
+  const handleEditInventario = (inventario) => {
+    setCurrentInventario(inventario);
+    setNombre(inventario.nombre);
+    setNumeroPisos(inventario.numeroPisos);
+    setImagen(null);
+    setPreviewImage(null);
     setOpenAddModal(true);
   };
 
   const handleCloseAddModal = () => {
     setOpenAddModal(false);
-    resetForm();
+    setCurrentInventario(null);
   };
 
-  // Resetear formulario
-  const resetForm = () => {
-    setNombre("");
-    setNumeroPisos("");
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setImagen(file);
+    setPreviewImage(URL.createObjectURL(file));
   };
 
-  // Manejar selección de archivo
-  // const handleFileChange = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (selectedFile) {
-  //     setFile(selectedFile);
-  //     setPreviewImage(URL.createObjectURL(selectedFile));
-  //   }
-  // };
-
-  // Enviar formulario
-  // Enviar formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      var response = await crearEdificio(nombre, numeroPisos);
-      console.log("Respuesta de la API:", response);
-
-      if (response.type === "ERROR") {
-        toast.error(response.text);
-      } else if (response.type === "SUCCESS") {
-        toast.success(response.text);
-      } else if (response.type === "WARNING") {
-        toast.warning(response.text);
+      const formData = new FormData();
+      formData.append("nombre", nombre);
+      formData.append("numeroPisos", numeroPisos);
+      if (imagen) {
+        formData.append("file", imagen);
       }
 
+      if (currentInventario) {
+        formData.append("id", currentInventario.id); // Incluye el ID al actualizar
+        await updateInventario(formData);
+        toast.success("Inventario actualizado correctamente");
+      } else {
+        await saveInventario(formData);
+        toast.success("Inventario creado correctamente");
+      }
       setOpenAddModal(false);
-      setNombre("");
-      // setMaterial("");
-      // setFile(null);
-      // setPreviewImage("");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al crear categoría");
-      console.error("Error al crear categoría:", error);
-      // Handle the error and display the appropriate toast for the error
+      toast.error("Error al guardar el inventario");
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Estados para el modal de confirmación de cambio de status
-  const [openStatusModal, setOpenStatusModal] = useState(false);
-  const [selectedCategoria, setSelectedCategoria] = useState(null);
-
-  // Función para abrir el modal de confirmación
-  const handleOpenStatusModal = (categoria) => {
-    setSelectedCategoria(categoria);
+  const handleOpenStatusModal = (inventario) => {
+    setSelectedInventario(inventario);
     setOpenStatusModal(true);
   };
 
-  // Función para cerrar el modal de confirmación
   const handleCloseStatusModal = () => {
     setOpenStatusModal(false);
-    setSelectedCategoria(null);
+    setSelectedInventario(null);
   };
 
-  // Función para cambiar el estado
-  const handleChangeStatus = async () => {
+  const handleConfirmChangeStatus = async () => {
     try {
-      if (!selectedCategoria) return;
-
-      const response = await chageStatus(selectedCategoria.id);
-
-      if (response.type === "SUCCESS") {
-        toast.success(response.text);
-        // Actualizar el estado local
-        setCategorias(
-          categorias.map((cat) =>
-            cat.id === selectedCategoria.id
-              ? { ...cat, status: !cat.status }
-              : cat
-          )
-        );
-      } else {
-        toast.error(response.text || "Error al cambiar el estado");
-      }
-
-      handleCloseStatusModal();
-    } catch (error) {
-      console.error("Error al cambiar el estado:", error);
-      toast.error(
-        error.response?.data?.message || "Error al cambiar el estado"
+      await changeStatusInventario(selectedInventario.id);
+      toast.success("Estado del inventario actualizado correctamente");
+      setInventarios(
+        inventarios.map((inv) =>
+          inv.id === selectedInventario.id ? { ...inv, estado: !inv.estado } : inv
+        )
       );
+    } catch (error) {
+      console.error("Error al cambiar el estado del inventario:", error);
+      toast.error("Error al cambiar el estado del inventario");
+    } finally {
       handleCloseStatusModal();
     }
   };
 
   return (
     <>
-      {/* Barra de búsqueda y filtros */}
       <div
         style={{
           display: "flex",
@@ -285,7 +231,6 @@ const GestionInventarios = () => {
         </div>
       </div>
 
-      {/* Título y botón de agregar */}
       <div
         style={{
           marginBottom: "10px",
@@ -302,12 +247,12 @@ const GestionInventarios = () => {
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          Inventarios / Edificios
+          Gestión de Inventarios
         </Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleAddCategory}
+          onClick={handleAddInventario}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -318,11 +263,10 @@ const GestionInventarios = () => {
           }}
         >
           <AddIcon sx={{ marginRight: "8px" }} />
-          Agregar Edificios
+          Agregar Inventario
         </Button>
       </div>
 
-      {/* Tabla de edificios  */}
       <div
         style={{
           maxWidth: "1350px",
@@ -348,15 +292,7 @@ const GestionInventarios = () => {
                   zIndex: 1,
                 }}
               >
-                {[
-                  "#",
-                  "Nombre",
-                  "Num de pisos",
-                  "Fecha de creacio",
-                  "Status",
-                  "Editar",
-                  "Espacios",
-                ].map((header) => (
+                {["#", "Nombre", "Descripción", "Estado", "Acciones"].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
@@ -372,41 +308,31 @@ const GestionInventarios = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCategorias
+              {filteredInventarios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((categoria) => (
+                .map((inventario, index) => (
                   <TableRow
-                    key={categoria.id}
+                    key={inventario.id}
                     sx={{
                       "&:hover": { backgroundColor: "#f5f5f5" },
                       transition: "background-color 0.3s",
                     }}
                   >
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.id}
+                      {page * rowsPerPage + index + 1}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.nombre}
+                      {inventario.nombre}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {categoria.numeroPisos}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {new Date(categoria.fechaCreacion).toLocaleDateString(
-                        "es-ES",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
+                      {inventario.descripcion}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Chip
-                        label={categoria.status ? "Activo" : "No activo"}
-                        color={categoria.status ? "success" : "default"}
+                        label={inventario.estado ? "Activo" : "Inactivo"}
+                        color={inventario.estado ? "success" : "default"}
                         size="small"
-                        onClick={() => handleOpenStatusModal(categoria)}
+                        onClick={() => handleOpenStatusModal(inventario)}
                         style={{ cursor: "pointer" }}
                       />
                     </TableCell>
@@ -418,21 +344,9 @@ const GestionInventarios = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
+                        onClick={() => handleEditInventario(inventario)}
                       >
                         <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                        onClick={() => navigate(`/gestion-inventarios/espacios/${categoria.id}`)}
-                      >
-                        <ArrowForwardIcon />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -442,7 +356,7 @@ const GestionInventarios = () => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredCategorias.length}
+            count={filteredInventarios.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -450,33 +364,6 @@ const GestionInventarios = () => {
           />
         </TableContainer>
 
-        {/* Modal para ver imagen */}
-        <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-          <DialogTitle>
-            Imagen de la categoría
-            <IconButton
-              aria-label="close"
-              onClick={handleClose}
-              sx={{
-                position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <img
-              src={selectedImage}
-              alt="Imagen seleccionada"
-              style={{ width: "100%" }}
-            />
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal para agregar/editar edificio */}
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
@@ -507,15 +394,15 @@ const GestionInventarios = () => {
                 fontSize: "1.8rem",
               }}
             >
-              {selectedCategoria ? "Editar Edificio" : "Agregar Nuevo Edificio"}
+              {currentInventario ? "Editar Inventario" : "Agregar Inventario"}
             </Typography>
 
             <IconButton
               onClick={handleCloseAddModal}
               sx={{
                 position: "absolute",
-                right: 16,
-                top: 16,
+                right: 24,
+                top: 24,
                 color: "#133e87",
                 "&:hover": {
                   bgcolor: "#dee2e6",
@@ -538,7 +425,7 @@ const GestionInventarios = () => {
                     fontSize: "1.1rem",
                   }}
                 >
-                  Nombre del edificio *
+                  Nombre del inventario *
                 </label>
                 <input
                   required
@@ -569,6 +456,7 @@ const GestionInventarios = () => {
                 </label>
                 <input
                   required
+                  type="number"
                   value={numeroPisos}
                   onChange={(e) => setNumeroPisos(e.target.value)}
                   style={{
@@ -579,9 +467,67 @@ const GestionInventarios = () => {
                     fontSize: "1rem",
                     transition: "all 0.3s",
                   }}
-                  type="number"
                 />
               </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <input
+                  accept="image/*"
+                  id="contained-button-file"
+                  type="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="contained-button-file">
+                  <Box
+                    sx={{
+                      border: "2px dashed #ced4da",
+                      borderRadius: "10px",
+                      p: 4,
+                      textAlign: "center",
+                      cursor: "pointer",
+                      transition: "all 0.3s",
+                      "&:hover": {
+                        borderColor: "#133e87",
+                        backgroundColor: "#f8f0ff",
+                      },
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#6c757d",
+                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      Arrastra o haz clic para subir una imagen
+                    </Typography>
+                  </Box>
+                </label>
+              </Box>
+
+              {previewImage && (
+                <Box
+                  sx={{
+                    mb: 3,
+                    border: "2px solid #e9ecef",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={previewImage}
+                    alt="Vista previa"
+                    style={{
+                      width: "100%",
+                      height: "250px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              )}
 
               <button
                 type="submit"
@@ -599,13 +545,12 @@ const GestionInventarios = () => {
                   transition: "all 0.3s",
                 }}
               >
-                {isLoading ? "Guardando..." : "Guardar Edificio"}
+                {isLoading ? "Guardando..." : "Guardar Inventario"}
               </button>
             </Box>
           </Box>
         </Dialog>
 
-        {/* Modal para confirmar cambio de estado */}
         <Dialog
           open={openStatusModal}
           onClose={handleCloseStatusModal}
@@ -666,10 +611,10 @@ const GestionInventarios = () => {
                   textAlign: "center",
                 }}
               >
-                ¿Estás seguro que deseas cambiar el estado del edificio
+                ¿Estás seguro que deseas cambiar el estado del inventario
                 <span style={{ fontWeight: 600, color: "#2b2d42" }}>
                   {" "}
-                  "{selectedCategoria?.nombre}"
+                  "{selectedInventario?.nombre}"
                 </span>
                 ?
               </Typography>
@@ -700,7 +645,7 @@ const GestionInventarios = () => {
                 Cancelar
               </Button>
               <Button
-                onClick={handleChangeStatus}
+                onClick={handleConfirmChangeStatus}
                 sx={{
                   px: 3,
                   py: 1,
@@ -722,7 +667,6 @@ const GestionInventarios = () => {
         </Dialog>
       </div>
 
-      {/* Contenedor de Toast */}
       <ToastContainer />
     </>
   );

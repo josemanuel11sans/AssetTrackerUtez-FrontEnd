@@ -12,7 +12,13 @@ export const getResponsable = async (id) =>{
 
 export const saveResponsable = async (responsable) => {
   try {
-    const response = await api.post(`${endpoint}/save`, responsable, {
+    const url = responsable.id 
+      ? `${endpoint}/update` // Endpoint para actualizar
+      : `${endpoint}/save`; // Endpoint para crear
+
+    const method = responsable.id ? "put" : "post"; // Método HTTP dinámico
+
+    const response = await api[method](url, responsable, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("jwt")}`,
         "Content-Type": "application/json",
@@ -20,7 +26,7 @@ export const saveResponsable = async (responsable) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error al guardar el responsable:", error);
+    console.error("Error al guardar o actualizar el responsable:", error);
     throw error;
   }
 };
