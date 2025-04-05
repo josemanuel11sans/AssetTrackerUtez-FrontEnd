@@ -2,6 +2,8 @@
 import { useParams } from "react-router-dom";;
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
+import { jsPDF } from "jspdf";
+import {  autoTable  }  from  'jspdf-autotable'
 // import {
 //   getEdificios,
 //   chageStatus,

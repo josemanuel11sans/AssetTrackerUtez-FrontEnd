@@ -176,7 +176,7 @@ const CategoriaRecursos = () => {
       const response = await updateCategoria(
         editCategoria.id, // ID de la categoría
         editNombre,       // Nombre actualizado
-        editMaterial,     // Material actualizado
+        editMaterial,     // Número de pisos actualizado
         file              // Archivo de imagen (opcional)
       );
   
@@ -188,7 +188,7 @@ const CategoriaRecursos = () => {
         setCategorias(
           categorias.map((cat) =>
             cat.id === editCategoria.id
-              ? { ...cat, nombre: editNombre, material: editMaterial }
+              ? { ...cat, nombre: editNombre, numeroPisos: editMaterial }
               : cat
           )
         );
