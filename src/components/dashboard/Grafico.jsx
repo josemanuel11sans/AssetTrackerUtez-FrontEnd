@@ -39,14 +39,14 @@ const Grafico = () => {
 
   return (
     <>
-      <Paper sx={{ p: 3, minHeight: "100vh", borderRadius: 0, boxShadow: "none", border: "1px solid #e0e0e0" }}>
+      <Paper sx={{ p: 3, height: "100%", borderRadius: 0, boxShadow: "none", border: "1px solid #e0e0e0" }}>
         <Typography variant="h6" gutterBottom display="flex" alignItems="center" color="#133e87">
           <FaChartBar size={20} style={{ marginRight: "8px" }} />
           Edificios
           <FaExpand size={20} style={{ marginLeft: "auto", cursor: "pointer" }} onClick={handleToggleModal} />
         </Typography>
 
-        <ResponsiveContainer width="100%" height="90%">
+        <ResponsiveContainer width="100%" height={300}>
           <BarChart data={buildingChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />

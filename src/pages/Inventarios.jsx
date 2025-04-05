@@ -480,93 +480,101 @@ const Inventarios = () => {
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
-          maxWidth="sm"
-          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
         >
-          <DialogTitle>
-            Agregar Nueva Categoría
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Agregar Nueva Categoría
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseAddModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="nombre"
-                label="Nombre de la categoría"
-                name="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                autoFocus
-              />
+          </Box>
 
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="material"
-                label="Material"
-                name="material"
-                value={material}
-                onChange={(e) => setMaterial(e.target.value)}
-              />
-
-              <input
-                accept="image/*"
-                style={{ display: "none" }}
-                id="contained-button-file"
-                type="file"
-                name="file"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="contained-button-file">
-                <Button
-                  variant="contained"
-                  component="span"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ mt: 2, mb: 2 }}
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
                 >
-                  Subir Imagen
-                </Button>
-              </label>
-              {previewImage && (
-                <Box>
-                  <img
-                    src={previewImage}
-                    alt="Vista previa"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </Box>
-              )}
+                  Nombre de la categoría *
+                </label>
+                <input
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
 
-              <Button
+              <button
                 type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Guardar"}
-              </Button>
+                {isLoading ? "Guardando..." : "Guardar Categoría"}
+              </button>
             </Box>
-          </DialogContent>
+          </Box>
         </Dialog>
 
         <Dialog open={openStatusModal} onClose={handleCloseStatusModal}>

@@ -507,7 +507,7 @@ const GestionInventarios = () => {
                 fontSize: "1.8rem",
               }}
             >
-              Agregar Nuevo Edificio
+              {selectedCategoria ? "Editar Edificio" : "Agregar Nuevo Edificio"}
             </Typography>
 
             <IconButton

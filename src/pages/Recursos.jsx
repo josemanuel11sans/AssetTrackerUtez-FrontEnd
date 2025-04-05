@@ -1,15 +1,9 @@
-
 import { useParams } from "react-router-dom";;
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { jsPDF } from "jspdf";
+
 import {  autoTable  }  from  'jspdf-autotable'
-// import {
-//   getEdificios,
-//   chageStatus,
-//   crearEdificio,
-//   getEdificiosid,
-// } from "../api/edificios";
 import {
   getRecursosInventarioId
 } from "../api/recursos";
@@ -33,6 +27,7 @@ import {
   TextField,
   CircularProgress,
 } from "@mui/material";
+import logoUrl from "../assets/logo.png";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
@@ -42,7 +37,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Navigate, useNavigate } from "react-router-dom";
 
 const Recursos = () => {
-  // Estados para la tabla y búsqueda
   const [edificio, setEdificio] = useState({  });
   const [filteredEspacios, setFilteredEspacios] = useState([]);
   const [page, setPage] = useState(0);
@@ -50,11 +44,9 @@ const Recursos = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
 
-  // Estados para el modal de imagen
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
 
-  // Estados para el modal de agregar espacio
   const [openAddModal, setOpenAddModal] = useState(false);
   const [nombre, setNombre] = useState("");
   const [numeroPlanta, setNumeroPlanta] = useState("");
@@ -64,11 +56,8 @@ const Recursos = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
-  // const [idInventario,setidInventario] = useState(0);
-  // setidInventario(id);
 
   console.log(id+ "id ")
-  // Obtener edificio y sus espacios
   useEffect(() => {
     if (!id) return;
     
@@ -93,7 +82,6 @@ const Recursos = () => {
   }, [id]);
 
   console.log(edificio.espacio)
-  // Filtrar espacios
   useEffect(() => {
     if (!edificio || !Array.isArray(edificio.espacios)) return;
   
@@ -120,7 +108,6 @@ const Recursos = () => {
     setSelectedImage("");
   };
 
-  // Manejar paginación
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -130,7 +117,6 @@ const Recursos = () => {
     setPage(0);
   };
 
-  // Manejar modal de agregar espacio
   const handleAddSpace = () => {
     setOpenAddModal(true);
   };
@@ -140,7 +126,6 @@ const Recursos = () => {
     resetForm();
   };
 
-  // Resetear formulario
   const resetForm = () => {
     setNombre("");
     setNumeroPlanta("");
@@ -148,7 +133,6 @@ const Recursos = () => {
     setPreviewImage("");
   };
 
-  // Manejar selección de archivo
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -157,17 +141,11 @@ const Recursos = () => {
     }
   };
 
-  // Enviar formulario para crear nuevo espacio
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Aquí deberías llamar a la API para crear un nuevo espacio
-      // var response = await crearEspacio(id, nombre, numeroPlanta, file);
-      // console.log("Respuesta de la API:", response);
-
-      // Simulando una respuesta exitosa
       const response = {
         type: "SUCCESS",
         text: "Espacio creado correctamente"
@@ -191,31 +169,23 @@ const Recursos = () => {
     }
   };
 
-  // Estados para el modal de confirmación de cambio de status
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [selectedEspacio, setSelectedEspacio] = useState(null);
 
-  // Función para abrir el modal de confirmación
   const handleOpenStatusModal = (espacio) => {
     setSelectedEspacio(espacio);
     setOpenStatusModal(true);
   };
 
-  // Función para cerrar el modal de confirmación
   const handleCloseStatusModal = () => {
     setOpenStatusModal(false);
     setSelectedEspacio(null);
   };
 
-  // Función para cambiar el estado
   const handleChangeStatus = async () => {
     try {
       if (!selectedEspacio) return;
 
-      // Aquí deberías llamar a la API para cambiar el estado
-      // const response = await changeStatusEspacio(selectedEspacio.id);
-
-      // Simulando una respuesta exitosa
       const response = {
         type: "SUCCESS",
         text: "Estado cambiado correctamente"
@@ -223,7 +193,6 @@ const Recursos = () => {
 
       if (response.type === "SUCCESS") {
         toast.success(response.text);
-        // Actualizar el estado local
         setEdificio(prev => ({
           ...prev,
           espacios: prev.espacios.map(esp => 
@@ -243,10 +212,43 @@ const Recursos = () => {
       handleCloseStatusModal();
     }
   };
+ 
+  const handleGeneratePDF = () => {
+    const doc = new jsPDF();
+    // const  = "../assets/logo.png"; // Ruta del logo
+
+    // Agregar el logo en la esquina superior derecha
+    const imgWidth = 20; // Ancho del logo
+    const imgHeight = 15; // Alto del logo
+    const marginRight = 10; // Margen derecho
+    const marginTop = 10; // Margen superior
+
+    doc.addImage(logoUrl, "PNG", doc.internal.pageSize.width - imgWidth - marginRight, marginTop, imgWidth, imgHeight);
+
+    // Título del reporte
+    doc.text("Reporte de Recursos", 14, 20);
+
+    // Generar tabla
+    autoTable(doc, {
+      startY: 40,
+      head: [["#", "Código", "Descripción", "Marca", "Modelo", "Num Serie", "Observaciones", "Estado"]],
+      body: filteredEspacios.map((espacio, index) => [
+        index + 1,
+        espacio.codigo,
+        espacio.descripcion,
+        espacio.marca,
+        espacio.modelo,
+        espacio.numeroSerie,
+        espacio.observaciones,
+        espacio.status ? "Activo" : "Inactivo",
+      ]),
+    });
+
+    doc.save("reporte_recursos.pdf");
+  };
 
   return (
     <>
-      {/* Barra de búsqueda y filtros */}
       <div
         style={{
           display: "flex",
@@ -311,7 +313,6 @@ const Recursos = () => {
         </div>
       </div>
 
-      {/* Título y botón de agregar */}
       <div
         style={{
           marginBottom: "10px",
@@ -330,25 +331,41 @@ const Recursos = () => {
         >
           {edificio.nombre} - Recursos
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleAddSpace}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            backgroundColor: "#133E87",
-            color: "white",
-            borderRadius: "20px",
-            padding: "8px 20px",
-          }}
-        >
-          <AddIcon sx={{ marginRight: "8px" }} />
-          Agregar Espacio
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddSpace}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "#133E87",
+              color: "white",
+              borderRadius: "20px",
+              padding: "8px 20px",
+            }}
+          >
+            <AddIcon sx={{ marginRight: "8px" }} />
+            Agregar Recurso
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleGeneratePDF}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              borderColor: "#133E87",
+              color: "#133E87",
+              borderRadius: "20px",
+              padding: "8px 20px",
+            }}
+          >
+            Generar PDF
+          </Button>
+        </Box>
       </div>
 
-      {/* Tabla de espacios */}
       <div
         style={{
           maxWidth: "1350px",
@@ -422,15 +439,7 @@ const Recursos = () => {
                       {espacio.descripcion}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {/* {espacio.urlImagen && (
-                        <img
-                          src={espacio.urlImagen}
-                          alt={espacio.nombre}
-                          width="40"
-                          style={{ borderRadius: "5px", cursor: "pointer" }}
-                          onClick={() => handleClickOpen(espacio.urlImagen)}
-                        />
-                      )} */}{espacio.marca}
+                      {espacio.marca}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {espacio.modelo}
@@ -458,7 +467,6 @@ const Recursos = () => {
                           color: "white",
                           borderRadius: "50%",
                           padding: "6px",
-                          // marginRight: "5px",
                         }}
                       >
                         <EditIcon />
@@ -480,7 +488,6 @@ const Recursos = () => {
           />
         </TableContainer>
 
-        {/* Modal para ver imagen */}
         <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
           <DialogTitle>
             Imagen del espacio
@@ -506,102 +513,104 @@ const Recursos = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Modal para agregar nuevo espacio */}
         <Dialog
           open={openAddModal}
           onClose={handleCloseAddModal}
-          maxWidth="sm"
-          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+              width: "90%",
+              maxWidth: "800px",
+              minWidth: "600px",
+            },
+          }}
         >
-          <DialogTitle>
-            Agregar Nuevo Espacio
+          <Box
+            sx={{
+              position: "relative",
+              bgcolor: "#f8f9fa",
+              p: 3,
+              borderBottom: "2px solid #e9ecef",
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 600,
+                color: "#2b2d42",
+                textAlign: "center",
+                fontSize: "1.8rem",
+              }}
+            >
+              Agregar Nuevo Recurso
+            </Typography>
+
             <IconButton
-              aria-label="close"
               onClick={handleCloseAddModal}
               sx={{
                 position: "absolute",
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
+                right: 16,
+                top: 16,
+                color: "#133e87",
+                "&:hover": {
+                  bgcolor: "#dee2e6",
+                },
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: "1.8rem" }} />
             </IconButton>
-          </DialogTitle>
-          <DialogContent>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="nombre"
-                label="Nombre del espacio"
-                name="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                autoFocus
-              />
+          </Box>
 
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="numeroPlanta"
-                label="Número de planta"
-                name="numeroPlanta"
-                value={numeroPlanta}
-                onChange={(e) => setNumeroPlanta(e.target.value)}
-                type="number"
-                inputProps={{
-                  min: 1,
-                  max: edificio.numeroPisos || 10
-                }}
-              />
-
-              <input
-                accept="image/*"
-                style={{ display: "none" }}
-                id="contained-button-file"
-                type="file"
-                name="file"
-                onChange={handleFileChange}
-              />
-              <label htmlFor="contained-button-file">
-                <Button
-                  variant="contained"
-                  component="span"
-                  startIcon={<CloudUploadIcon />}
-                  sx={{ mt: 2, mb: 2 }}
+          <Box sx={{ p: 3 }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
                 >
-                  Subir Imagen
-                </Button>
-              </label>
-              {previewImage && (
-                <Box>
-                  <img
-                    src={previewImage}
-                    alt="Vista previa"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "200px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </Box>
-              )}
+                  Nombre del recurso *
+                </label>
+                <input
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
 
-              <Button
+              <button
                 type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{ mt: 3, mb: 2 }}
                 disabled={isLoading}
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.3s",
+                }}
               >
-                {isLoading ? <CircularProgress size={24} /> : "Guardar"}
-              </Button>
+                {isLoading ? "Guardando..." : "Guardar Recurso"}
+              </button>
             </Box>
-          </DialogContent>
+          </Box>
         </Dialog>
 
         <Dialog open={openStatusModal} onClose={handleCloseStatusModal}>
@@ -647,7 +656,6 @@ const Recursos = () => {
         </Dialog>
       </div>
 
-      {/* Contenedor de Toast */}
       <ToastContainer />
     </>
   );

@@ -67,7 +67,7 @@ const Home = () => {
         <HeaderDashboard />
 
         {/* Tarjetas de estadísticas */}
-        <Grid container spacing={2} sx={{ p: 2 }}>
+        <Grid container spacing={1} sx={{ p: 1 }}>
           {stats.map((stat, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Card
