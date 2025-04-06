@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { getEspaciosEdificiosid } from "../api/espacios";
+import { getEspaciosEdificiosid, saveEspacio, updateEspacio, changeStatusEspacio } from "../api/espacios";
 import { getEdificios } from "../api/edificios";
 import {
   Table,
@@ -159,35 +159,26 @@ const Espacios = () => {
     }
   };
 
-  // Enviar formulario para crear nuevo espacio
+  // Enviar formulario para crear o actualizar un espacio
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Aquí deberías llamar a la API para crear un nuevo espacio
-      // var response = await crearEspacio(id, nombre, numeroPlanta, file);
-      // console.log("Respuesta de la API:", response);
-
-      // Simulando una respuesta exitosa
-      const response = {
-        type: "SUCCESS",
-        text: "Espacio creado correctamente",
-      };
-
-      if (response.type === "ERROR") {
-        toast.error(response.text);
-      } else if (response.type === "SUCCESS") {
-        toast.success(response.text);
-      } else if (response.type === "WARNING") {
-        toast.warning(response.text);
+      if (editEspacio) {
+        // Actualizar espacio existente
+        await updateEspacio(editEspacio.id, nombre, numeroPlanta, file, id);
+        toast.success("Espacio actualizado correctamente");
+      } else {
+        // Crear nuevo espacio
+        await saveEspacio(nombre, numeroPlanta, file, id);
+        toast.success("Espacio creado correctamente");
       }
-
       setOpenAddModal(false);
       resetForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al crear espacio");
-      console.error("Error al crear espacio:", error);
+      toast.error("Error al guardar el espacio");
+      console.error("Error al guardar el espacio:", error);
     } finally {
       setIsLoading(false);
     }
@@ -209,39 +200,33 @@ const Espacios = () => {
     setSelectedEspacio(null);
   };
 
-  // Función para cambiar el estado
+  // Cambiar estado del espacio
   const handleChangeStatus = async () => {
     try {
       if (!selectedEspacio) return;
 
-      // Aquí deberías llamar a la API para cambiar el estado
-      // const response = await changeStatusEspacio(selectedEspacio.id);
+      await changeStatusEspacio(selectedEspacio.id);
+      toast.success("Estado del espacio actualizado correctamente");
 
-      // Simulando una respuesta exitosa
-      const response = {
-        type: "SUCCESS",
-        text: "Estado cambiado correctamente",
-      };
+      setFilteredEspacios((prev) =>
+        prev.map((esp) =>
+          esp.id === selectedEspacio.id ? { ...esp, status: !esp.status } : esp
+        )
+      );
 
-      if (response.type === "SUCCESS") {
-        toast.success(response.text);
-        // Actualizar el estado local
-        setEdificio((prev) => ({
-          ...prev,
-          espacios: prev.espacios.map((esp) =>
-            esp.id === selectedEspacio.id
-              ? { ...esp, status: !esp.status }
-              : esp
-          ),
-        }));
-      } else {
-        toast.error(response.text || "Error al cambiar el estado");
-      }
+      setEdificio((prev) => ({
+        ...prev,
+        espacios: Array.isArray(prev.espacios)
+          ? prev.espacios.map((esp) =>
+              esp.id === selectedEspacio.id ? { ...esp, status: !esp.status } : esp
+            )
+          : [],
+      }));
 
       handleCloseStatusModal();
     } catch (error) {
-      console.error("Error al cambiar el estado:", error);
-      toast.error(error.response?.data?.message || "Error al cambiar el estado");
+      console.error("Error al cambiar el estado del espacio:", error);
+      toast.error("Error al cambiar el estado del espacio");
       handleCloseStatusModal();
     }
   };
@@ -251,6 +236,7 @@ const Espacios = () => {
     setEditEspacio(espacio);
     setEditNombre(espacio.nombre);
     setEditNumeroPlanta(espacio.numeroPlanta);
+    setPreviewImage(espacio.urlImagen || ""); // Muestra la imagen actual como vista previa
     setOpenEditModal(true);
   };
 
@@ -268,23 +254,17 @@ const Espacios = () => {
     setIsLoading(true);
 
     try {
-      console.log("Espacio editado:", {
-        id: editEspacio.id,
-        nombre: editNombre,
-        numeroPlanta: editNumeroPlanta,
-      });
-
-      // Simulación de actualización en el estado local
-      setEdificio((prev) => ({
-        ...prev,
-        espacios: prev.espacios.map((esp) =>
-          esp.id === editEspacio.id
-            ? { ...esp, nombre: editNombre, numeroPlanta: editNumeroPlanta }
-            : esp
-        ),
-      }));
-
+      await updateEspacio(editEspacio.id, editNombre, editNumeroPlanta, file, id);
       toast.success("Espacio actualizado correctamente");
+
+      setFilteredEspacios((prev) =>
+        prev.map((esp) =>
+          esp.id === editEspacio.id
+            ? { ...esp, nombre: editNombre, numeroPlanta: editNumeroPlanta, urlImagen: previewImage }
+            : esp
+        )
+      );
+
       handleCloseEditModal();
     } catch (error) {
       console.error("Error al editar el espacio:", error);
@@ -449,87 +429,77 @@ const Espacios = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredEspacios
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((espacio) => (
-                  <TableRow
-                    key={espacio.id}
-                    sx={{
-                      "&:hover": { backgroundColor: "#f5f5f5" },
-                      transition: "background-color 0.3s",
-                    }}
-                  >
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.id}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.nombre}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.numeroPlanta}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.urlImagen && (
-                        <img
-                          src={espacio.urlImagen}
-                          alt={espacio.nombre}
-                          width="40"
-                          style={{ borderRadius: "5px", cursor: "pointer" }}
-                          onClick={() => handleClickOpen(espacio.urlImagen)}
+              {Array.isArray(filteredEspacios) &&
+                filteredEspacios
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((espacio) => (
+                    <TableRow
+                      key={espacio.id}
+                      sx={{
+                        "&:hover": { backgroundColor: "#f5f5f5" },
+                        transition: "background-color 0.3s",
+                      }}
+                    >
+                      <TableCell sx={{ textAlign: "center" }}>{espacio.id}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{espacio.nombre}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{espacio.numeroPlanta}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.urlImagen && (
+                          <img
+                            src={espacio.urlImagen}
+                            alt={espacio.nombre}
+                            width="40"
+                            style={{ borderRadius: "5px", cursor: "pointer" }}
+                            onClick={() => handleClickOpen(espacio.urlImagen)}
+                          />
+                        )}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Chip
+                          label={espacio.status ? "Activo" : "Inactivo"}
+                          color={espacio.status ? "success" : "default"}
+                          size="small"
+                          onClick={() => handleOpenStatusModal(espacio)}
+                          style={{ cursor: "pointer" }}
                         />
-                      )}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Chip
-                        label={espacio.status ? "Activo" : "Inactivo"}
-                        color={espacio.status ? "success" : "default"}
-                        size="small"
-                        onClick={() => handleOpenStatusModal(espacio)}
-                        style={{ cursor: "pointer" }}
-                      />
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {new Date(espacio.fechaCreacion).toLocaleDateString(
-                        "es-ES",
-                        {
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {new Date(espacio.fechaCreacion).toLocaleDateString("es-ES", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",
-                        }
-                      )}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                        onClick={() => handleOpenEditModal(espacio)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                        onClick={() =>
-                          navigate(
-                            `/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`
-                          )
-                        }
-                      >
-                        <ArrowForwardIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        })}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <IconButton
+                          sx={{
+                            backgroundColor: "#133E87",
+                            color: "white",
+                            borderRadius: "50%",
+                            padding: "6px",
+                          }}
+                          onClick={() => handleOpenEditModal(espacio)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <IconButton
+                          sx={{
+                            backgroundColor: "#133E87",
+                            color: "white",
+                            borderRadius: "50%",
+                            padding: "6px",
+                          }}
+                          onClick={() =>
+                            navigate(`/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`)
+                          }
+                        >
+                          <ArrowForwardIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
           <TablePagination
@@ -872,6 +842,72 @@ const Espacios = () => {
                   type="number"
                 />
               </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <input
+                  accept="image/*"
+                  id="edit-file-input"
+                  type="file"
+                  name="file"
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="edit-file-input">
+                  <Box
+                    sx={{
+                      border: "2px dashed #ced4da",
+                      borderRadius: "10px",
+                      p: 4,
+                      textAlign: "center",
+                      cursor: "pointer",
+                      transition: "all 0.3s",
+                      "&:hover": {
+                        borderColor: "#133e87",
+                        backgroundColor: "#f8f0ff",
+                      },
+                    }}
+                  >
+                    <CloudUploadIcon
+                      sx={{
+                        color: "#133e87",
+                        fontSize: "2.5rem",
+                        mb: 2,
+                      }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#6c757d",
+                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      Arrastra o haz clic para subir una imagen
+                    </Typography>
+                  </Box>
+                </label>
+              </Box>
+
+              {previewImage && (
+                <Box
+                  sx={{
+                    mb: 3,
+                    border: "2px solid #e9ecef",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={previewImage}
+                    alt="Vista previa"
+                    style={{
+                      width: "100%",
+                      height: "250px",
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              )}
 
               <button
                 type="submit"
