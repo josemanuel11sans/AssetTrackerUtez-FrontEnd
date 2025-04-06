@@ -32,7 +32,7 @@ const Usuarios = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active"); // Cambia el valor inicial a "active"
   const [openAddModal, setOpenAddModal] = useState(false);
   const [currentUsuario, setCurrentUsuario] = useState(null);
   const [nombre, setNombre] = useState("");
@@ -66,8 +66,8 @@ const Usuarios = () => {
   }, [usuarios]);
 
   useEffect(() => {
-    let filtered = usuarios.filter((categoria) =>
-      categoria.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = usuarios.filter((usuario) =>
+      usuario.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (statusFilter !== "all") {

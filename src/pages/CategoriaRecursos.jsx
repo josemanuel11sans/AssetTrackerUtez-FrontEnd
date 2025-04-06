@@ -51,6 +51,17 @@ const CategoriaRecursos = () => {
   const [open, setOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
 
+  // Manejar imagen seleccionada
+  const handleClickOpen = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedImage("");
+  };
+
   // Estados para el modal de agregar categoría
   const [openAddModal, setOpenAddModal] = useState(false);
   const [nombre, setNombre] = useState("");
@@ -95,17 +106,6 @@ const CategoriaRecursos = () => {
 
     setFilteredCategorias(filtered);
   }, [searchQuery, statusFilter, categorias]);
-
-  // Manejar imagen seleccionada
-  const handleClickOpen = (imageUrl) => {
-    setSelectedImage(imageUrl);
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedImage("");
-  };
 
   // Manejar paginación
   const handleChangePage = (event, newPage) => {

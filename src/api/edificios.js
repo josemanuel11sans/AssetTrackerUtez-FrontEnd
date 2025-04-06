@@ -6,11 +6,11 @@ export const getEdificios = async () => {
   return await api.get(`${endpoint}/all`);
 };
 
-export const getEdificiosid = async (id) => {
+export const getInventarios = async (id) => {
   return await api.get(`${endpoint}/${id}`);
 };
 
-export const chageStatus = async (id) => {
+export const changeStatusEdificio = async (id) => {
   try {
     const response = await api.put(
       `${endpoint}/status`,
@@ -28,7 +28,25 @@ export const chageStatus = async (id) => {
   }
 };
 
-export const crearEdificio = async (formData) => {
+export const changeStatusInventario = async (id) => {
+  try {
+    const response = await api.put(
+      `${endpoint}/status`,
+      { id },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error al cambiar el estado del edificio:", error);
+    throw error;
+  }
+};
+
+export const saveInventario = async (formData) => {
   try {
     const response = await api.post(`${endpoint}/save`, formData, {
       headers: {
@@ -43,7 +61,7 @@ export const crearEdificio = async (formData) => {
   }
 };
 
-export const actualizarEdificio = async (formData) => {
+export const updateInventario = async (formData) => {
   try {
     const response = await api.put(`${endpoint}/update`, formData, {
       headers: {

@@ -33,7 +33,7 @@ const CategoriasEspacios = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active");
+  const [statusFilter, setStatusFilter] = useState("active"); // Cambia el valor inicial a "active"
   const [shouldReload, setShouldReload] = useState(true); // Estado para controlar la recarga
 
   // Estados para el modal de agregar/editar categoría

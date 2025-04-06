@@ -22,54 +22,76 @@ import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import { getInventarios, saveInventario, updateInventario, changeStatusInventario } from "../api/edificios";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { useNavigate } from "react-router-dom";
+import { getEdificios, saveInventario, updateInventario, changeStatusEdificio } from "../api/edificios";
 
 const GestionInventarios = () => {
-  const [inventarios, setInventarios] = useState([]);
-  const [filteredInventarios, setFilteredInventarios] = useState([]);
+  const navigate = useNavigate();
+  const [edificios, setEdificios] = useState([]);
+  const [filteredEdificios, setFilteredEdificios] = useState([]);
+  const [shouldReload, setShouldReload] = useState(true); // Estado para controlar la recarga
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active"); // Cambia el valor inicial a "active"
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [currentInventario, setCurrentInventario] = useState(null);
+  const [currentEdificio, setCurrentEdificio] = useState(null);
   const [nombre, setNombre] = useState("");
   const [numeroPisos, setNumeroPisos] = useState("");
   const [imagen, setImagen] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
-  const [selectedInventario, setSelectedInventario] = useState(null);
+  const [selectedEdificio, setSelectedEdificio] = useState(null);
+
+  // Estados para el modal de imagen
+  const [openImageModal, setOpenImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  // Manejar imagen seleccionada
+  const handleOpenImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpenImageModal(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setOpenImageModal(false);
+    setSelectedImage("");
+  };
 
   useEffect(() => {
-    const fetchInventarios = async () => {
+    const fetchEdificios = async () => {
       try {
-        const response = await getInventarios();
+        const response = await getEdificios();
         const newData = response.data.result;
-        setInventarios(newData);
-        setFilteredInventarios(newData);
+        setEdificios(newData);
+        setFilteredEdificios(newData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        toast.error("Error al cargar los inventarios");
+        toast.error("Error al cargar los edificios");
       }
     };
 
-    fetchInventarios();
-  }, []);
+    if (shouldReload) {
+      fetchEdificios();
+      setShouldReload(false); // Restablece el estado después de recargar
+    }
+  }, [shouldReload]);
 
   useEffect(() => {
-    let filtered = inventarios.filter((inventario) =>
-      inventario.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+    let filtered = edificios.filter((edificio) =>
+      edificio.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (statusFilter !== "all") {
       filtered = filtered.filter(
-        (inventario) => inventario.estado === (statusFilter === "active")
+        (edificio) => edificio.status === (statusFilter === "active")
       );
     }
 
-    setFilteredInventarios(filtered);
-  }, [searchQuery, statusFilter, inventarios]);
+    setFilteredEdificios(filtered);
+  }, [searchQuery, statusFilter, edificios]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -80,8 +102,8 @@ const GestionInventarios = () => {
     setPage(0);
   };
 
-  const handleAddInventario = () => {
-    setCurrentInventario(null);
+  const handleAddEdificio = () => {
+    setCurrentEdificio(null);
     setNombre("");
     setNumeroPisos("");
     setImagen(null);
@@ -89,10 +111,10 @@ const GestionInventarios = () => {
     setOpenAddModal(true);
   };
 
-  const handleEditInventario = (inventario) => {
-    setCurrentInventario(inventario);
-    setNombre(inventario.nombre);
-    setNumeroPisos(inventario.numeroPisos);
+  const handleEditEdificio = (edificio) => {
+    setCurrentEdificio(edificio);
+    setNombre(edificio.nombre);
+    setNumeroPisos(edificio.numeroPisos);
     setImagen(null);
     setPreviewImage(null);
     setOpenAddModal(true);
@@ -100,7 +122,7 @@ const GestionInventarios = () => {
 
   const handleCloseAddModal = () => {
     setOpenAddModal(false);
-    setCurrentInventario(null);
+    setCurrentEdificio(null);
   };
 
   const handleFileChange = (e) => {
@@ -121,45 +143,42 @@ const GestionInventarios = () => {
         formData.append("file", imagen);
       }
 
-      if (currentInventario) {
-        formData.append("id", currentInventario.id); // Incluye el ID al actualizar
+      if (currentEdificio) {
+        formData.append("id", currentEdificio.id);
         await updateInventario(formData);
-        toast.success("Inventario actualizado correctamente");
+        toast.success("Edificio actualizado correctamente");
       } else {
         await saveInventario(formData);
-        toast.success("Inventario creado correctamente");
+        toast.success("Edificio creado correctamente");
       }
       setOpenAddModal(false);
+      setShouldReload(true); // Marca que se debe recargar la tabla
     } catch (error) {
-      toast.error("Error al guardar el inventario");
+      toast.error("Error al guardar el edificio");
       console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOpenStatusModal = (inventario) => {
-    setSelectedInventario(inventario);
+  const handleOpenStatusModal = (edificio) => {
+    setSelectedEdificio(edificio);
     setOpenStatusModal(true);
   };
 
   const handleCloseStatusModal = () => {
     setOpenStatusModal(false);
-    setSelectedInventario(null);
+    setSelectedEdificio(null);
   };
 
   const handleConfirmChangeStatus = async () => {
     try {
-      await changeStatusInventario(selectedInventario.id);
-      toast.success("Estado del inventario actualizado correctamente");
-      setInventarios(
-        inventarios.map((inv) =>
-          inv.id === selectedInventario.id ? { ...inv, estado: !inv.estado } : inv
-        )
-      );
+      await changeStatusEdificio(selectedEdificio.id);
+      toast.success("Estado del edificio actualizado correctamente");
+      setShouldReload(true); // Marca que se debe recargar la tabla
     } catch (error) {
-      console.error("Error al cambiar el estado del inventario:", error);
-      toast.error("Error al cambiar el estado del inventario");
+      console.error("Error al cambiar el estado del edificio:", error);
+      toast.error("Error al cambiar el estado del edificio");
     } finally {
       handleCloseStatusModal();
     }
@@ -167,6 +186,7 @@ const GestionInventarios = () => {
 
   return (
     <>
+      {/* Barra de búsqueda y filtros */}
       <div
         style={{
           display: "flex",
@@ -231,6 +251,7 @@ const GestionInventarios = () => {
         </div>
       </div>
 
+      {/* Título y botón de agregar */}
       <div
         style={{
           marginBottom: "10px",
@@ -247,12 +268,12 @@ const GestionInventarios = () => {
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          Gestión de Inventarios
+          Gestión de Edificios
         </Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={handleAddInventario}
+          onClick={handleAddEdificio}
           sx={{
             display: "flex",
             alignItems: "center",
@@ -263,10 +284,11 @@ const GestionInventarios = () => {
           }}
         >
           <AddIcon sx={{ marginRight: "8px" }} />
-          Agregar Inventario
+          Agregar Edificio
         </Button>
       </div>
 
+      {/* Tabla de edificios */}
       <div
         style={{
           maxWidth: "1350px",
@@ -286,33 +308,30 @@ const GestionInventarios = () => {
         >
           <Table size="small">
             <TableHead>
-              <TableRow
-                sx={{
-                  backgroundColor: "#133e87",
-                  zIndex: 1,
-                }}
-              >
-                {["#", "Nombre", "Descripción", "Estado", "Acciones"].map((header) => (
-                  <TableCell
-                    key={header}
-                    sx={{
-                      color: "white",
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      padding: "12px 16px",
-                    }}
-                  >
-                    {header}
-                  </TableCell>
-                ))}
+              <TableRow sx={{ backgroundColor: "#133e87" }}>
+                {["#", "Nombre", "Número de Pisos", "Imagen", "Estado", "Editar","Espacios"].map(
+                  (header) => (
+                    <TableCell
+                      key={header}
+                      sx={{
+                        color: "white",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        padding: "12px 16px",
+                      }}
+                    >
+                      {header}
+                    </TableCell>
+                  )
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredInventarios
+              {filteredEdificios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((inventario, index) => (
+                .map((edificio, index) => (
                   <TableRow
-                    key={inventario.id}
+                    key={edificio.id}
                     sx={{
                       "&:hover": { backgroundColor: "#f5f5f5" },
                       transition: "background-color 0.3s",
@@ -322,17 +341,35 @@ const GestionInventarios = () => {
                       {page * rowsPerPage + index + 1}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {inventario.nombre}
+                      {edificio.nombre}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {inventario.descripcion}
+                      {edificio.numeroPisos}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {edificio.urlImagen ? (
+                        <img
+                          src={edificio.urlImagen}
+                          alt={edificio.nombre}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            borderRadius: "5px",
+                            objectFit: "cover",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handleOpenImageModal(edificio.urlImagen)}
+                        />
+                      ) : (
+                        "Sin imagen"
+                      )}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <Chip
-                        label={inventario.estado ? "Activo" : "Inactivo"}
-                        color={inventario.estado ? "success" : "default"}
+                        label={edificio.status ? "Activo" : "Inactivo"}
+                        color={edificio.status ? "success" : "default"} // Verde para activos, gris para inactivos
                         size="small"
-                        onClick={() => handleOpenStatusModal(inventario)}
+                        onClick={() => handleOpenStatusModal(edificio)}
                         style={{ cursor: "pointer" }}
                       />
                     </TableCell>
@@ -344,9 +381,24 @@ const GestionInventarios = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
-                        onClick={() => handleEditInventario(inventario)}
+                        onClick={() => handleEditEdificio(edificio)}
                       >
                         <EditIcon />
+                      </IconButton>
+                     
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                    <IconButton
+                        sx={{
+                          backgroundColor: "#133E87",
+                          color: "white",
+                          borderRadius: "50%",
+                          padding: "6px",
+                          marginLeft: "8px",
+                        }}
+                        onClick={() => navigate(`/gestion-inventarios/espacios/${edificio.id}`)}
+                      >
+                        <ArrowForwardIcon />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -356,316 +408,343 @@ const GestionInventarios = () => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, 50]}
             component="div"
-            count={filteredInventarios.length}
+            count={filteredEdificios.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </TableContainer>
+      </div>
 
-        <Dialog
-          open={openAddModal}
-          onClose={handleCloseAddModal}
-          PaperProps={{
-            sx: {
-              borderRadius: "16px",
-              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
-              width: "90%",
-              maxWidth: "800px",
-              minWidth: "600px",
-            },
+      {/* Modales para agregar/editar y cambiar estado */}
+      <Dialog
+        open={openAddModal}
+        onClose={handleCloseAddModal}
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+            width: "90%",
+            maxWidth: "800px",
+            minWidth: "600px",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            bgcolor: "#f8f9fa",
+            p: 3,
+            borderBottom: "2px solid #e9ecef",
           }}
         >
-          <Box
+          <Typography
+            variant="h5"
             sx={{
-              position: "relative",
-              bgcolor: "#f8f9fa",
-              p: 3,
-              borderBottom: "2px solid #e9ecef",
+              fontWeight: 600,
+              color: "#2b2d42",
+              textAlign: "center",
+              fontSize: "1.8rem",
             }}
           >
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 600,
-                color: "#2b2d42",
-                textAlign: "center",
-                fontSize: "1.8rem",
-              }}
-            >
-              {currentInventario ? "Editar Inventario" : "Agregar Inventario"}
-            </Typography>
+            {currentEdificio ? "Editar Edificio" : "Agregar Edificio"}
+          </Typography>
 
-            <IconButton
-              onClick={handleCloseAddModal}
-              sx={{
-                position: "absolute",
-                right: 24,
-                top: 24,
-                color: "#133e87",
-                "&:hover": {
-                  bgcolor: "#dee2e6",
-                },
-              }}
-            >
-              <CloseIcon sx={{ fontSize: "1.8rem" }} />
-            </IconButton>
-          </Box>
+          <IconButton
+            onClick={handleCloseAddModal}
+            sx={{
+              position: "absolute",
+              right: 24,
+              top: 24,
+              color: "#133e87",
+              "&:hover": {
+                bgcolor: "#dee2e6",
+              },
+            }}
+          >
+            <CloseIcon sx={{ fontSize: "1.8rem" }} />
+          </IconButton>
+        </Box>
 
-          <Box sx={{ p: 3 }}>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-              <Box sx={{ mb: 3 }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "12px",
-                    color: "#133e87",
-                    fontWeight: 500,
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  Nombre del inventario *
-                </label>
-                <input
-                  required
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    borderRadius: "10px",
-                    border: "2px solid #ced4da",
-                    fontSize: "1rem",
-                    transition: "all 0.3s",
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ mb: 3 }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "12px",
-                    color: "#133e87",
-                    fontWeight: 500,
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  Número de pisos *
-                </label>
-                <input
-                  required
-                  type="number"
-                  value={numeroPisos}
-                  onChange={(e) => setNumeroPisos(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    borderRadius: "10px",
-                    border: "2px solid #ced4da",
-                    fontSize: "1rem",
-                    transition: "all 0.3s",
-                  }}
-                />
-              </Box>
-
-              <Box sx={{ mb: 3 }}>
-                <input
-                  accept="image/*"
-                  id="contained-button-file"
-                  type="file"
-                  name="file"
-                  onChange={handleFileChange}
-                  style={{ display: "none" }}
-                />
-                <label htmlFor="contained-button-file">
-                  <Box
-                    sx={{
-                      border: "2px dashed #ced4da",
-                      borderRadius: "10px",
-                      p: 4,
-                      textAlign: "center",
-                      cursor: "pointer",
-                      transition: "all 0.3s",
-                      "&:hover": {
-                        borderColor: "#133e87",
-                        backgroundColor: "#f8f0ff",
-                      },
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "#6c757d",
-                        fontWeight: 500,
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      Arrastra o haz clic para subir una imagen
-                    </Typography>
-                  </Box>
-                </label>
-              </Box>
-
-              {previewImage && (
-                <Box
-                  sx={{
-                    mb: 3,
-                    border: "2px solid #e9ecef",
-                    borderRadius: "10px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <img
-                    src={previewImage}
-                    alt="Vista previa"
-                    style={{
-                      width: "100%",
-                      height: "250px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </Box>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
+        <Box sx={{ p: 3 }}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <Box sx={{ mb: 3 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "12px",
+                  color: "#133e87",
+                  fontWeight: 500,
+                  fontSize: "1.1rem",
+                }}
+              >
+                Nombre del edificio *
+              </label>
+              <input
+                required
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 style={{
                   width: "100%",
-                  padding: "16px",
-                  backgroundColor: isLoading ? "#133e87" : "#133e87",
-                  color: "white",
-                  border: "none",
+                  padding: "14px",
                   borderRadius: "10px",
-                  fontSize: "1.1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
+                  border: "2px solid #ced4da",
+                  fontSize: "1rem",
                   transition: "all 0.3s",
                 }}
-              >
-                {isLoading ? "Guardando..." : "Guardar Inventario"}
-              </button>
+              />
             </Box>
-          </Box>
-        </Dialog>
 
-        <Dialog
-          open={openStatusModal}
-          onClose={handleCloseStatusModal}
-          PaperProps={{
-            sx: {
-              borderRadius: "16px",
-              boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
-              width: "90%",
-              maxWidth: "500px",
-              minWidth: "400px",
-            },
-          }}
-        >
-          <Box
-            sx={{
-              position: "relative",
-              bgcolor: "#f8f9fa",
-              p: 3,
-              borderBottom: "2px solid #e9ecef",
-            }}
-          >
-            <Typography
-              variant="h5"
-              sx={{
+            <Box sx={{ mb: 3 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "12px",
+                  color: "#133e87",
+                  fontWeight: 500,
+                  fontSize: "1.1rem",
+                }}
+              >
+                Número de pisos *
+              </label>
+              <input
+                required
+                type="number"
+                value={numeroPisos}
+                onChange={(e) => setNumeroPisos(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  border: "2px solid #ced4da",
+                  fontSize: "1rem",
+                  transition: "all 0.3s",
+                }}
+              />
+            </Box>
+
+            <Box sx={{ mb: 3 }}>
+              <input
+                accept="image/*"
+                id="contained-button-file"
+                type="file"
+                name="file"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+              <label htmlFor="contained-button-file">
+                <Box
+                  sx={{
+                    border: "2px dashed #ced4da",
+                    borderRadius: "10px",
+                    p: 4,
+                    textAlign: "center",
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    "&:hover": {
+                      borderColor: "#133e87",
+                      backgroundColor: "#f8f0ff",
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#6c757d",
+                      fontWeight: 500,
+                      fontSize: "1.1rem",
+                    }}
+                  >
+                    Arrastra o haz clic para subir una imagen
+                  </Typography>
+                </Box>
+              </label>
+            </Box>
+
+            {previewImage && (
+              <Box
+                sx={{
+                  mb: 3,
+                  border: "2px solid #e9ecef",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={previewImage}
+                  alt="Vista previa"
+                  style={{
+                    width: "100%",
+                    height: "250px",
+                    objectFit: "cover",
+                  }}
+                />
+              </Box>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                width: "100%",
+                padding: "16px",
+                backgroundColor: isLoading ? "#133e87" : "#133e87",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "1.1rem",
                 fontWeight: 600,
-                color: "#2b2d42",
-                textAlign: "center",
-                fontSize: "1.6rem",
+                cursor: "pointer",
+                transition: "all 0.3s",
               }}
             >
-              Confirmar cambio de estado
-            </Typography>
+              {isLoading ? "Guardando..." : "Guardar Edificio"}
+            </button>
+          </Box>
+        </Box>
+      </Dialog>
 
-            <IconButton
+      <Dialog
+        open={openStatusModal}
+        onClose={handleCloseStatusModal}
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+            width: "90%",
+            maxWidth: "500px",
+            minWidth: "400px",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            bgcolor: "#f8f9fa",
+            p: 3,
+            borderBottom: "2px solid #e9ecef",
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: "#2b2d42",
+              textAlign: "center",
+              fontSize: "1.6rem",
+            }}
+          >
+            Confirmar cambio de estado
+          </Typography>
+
+          <IconButton
+            onClick={handleCloseStatusModal}
+            sx={{
+              position: "absolute",
+              right: 16,
+              top: 16,
+              color: "#133e87",
+              "&:hover": {
+                bgcolor: "#dee2e6",
+              },
+            }}
+          >
+            <CloseIcon sx={{ fontSize: "1.5rem" }} />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#495057",
+                fontSize: "1.1rem",
+                lineHeight: 1.5,
+                textAlign: "center",
+              }}
+            >
+              ¿Estás seguro que deseas cambiar el estado del edificio
+              <span style={{ fontWeight: 600, color: "#2b2d42" }}>
+                {" "}
+                "{selectedEdificio?.nombre}"
+              </span>
+              ?
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "12px",
+              mt: 3,
+            }}
+          >
+            <Button
               onClick={handleCloseStatusModal}
               sx={{
-                position: "absolute",
-                right: 16,
-                top: 16,
-                color: "#133e87",
+                px: 3,
+                py: 1,
+                border: "1px solid #ced4da",
+                borderRadius: "8px",
+                color: "#6c757d",
+                fontWeight: 600,
                 "&:hover": {
-                  bgcolor: "#dee2e6",
+                  bgcolor: "#133e87",
                 },
               }}
             >
-              <CloseIcon sx={{ fontSize: "1.5rem" }} />
-            </IconButton>
-          </Box>
-
-          <Box sx={{ p: 3 }}>
-            <Box sx={{ mb: 4 }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: "#495057",
-                  fontSize: "1.1rem",
-                  lineHeight: 1.5,
-                  textAlign: "center",
-                }}
-              >
-                ¿Estás seguro que deseas cambiar el estado del inventario
-                <span style={{ fontWeight: 600, color: "#2b2d42" }}>
-                  {" "}
-                  "{selectedInventario?.nombre}"
-                </span>
-                ?
-              </Typography>
-            </Box>
-
-            <Box
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmChangeStatus}
               sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "12px",
-                mt: 3,
+                px: 3,
+                py: 1,
+                bgcolor: "#133e87",
+                color: "white",
+                borderRadius: "8px",
+                fontWeight: 600,
+                "&:hover": {
+                  bgcolor: "#133e87",
+                  transform: "translateY(-1px)",
+                },
+                transition: "all 0.3s",
               }}
             >
-              <Button
-                onClick={handleCloseStatusModal}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  border: "1px solid #ced4da",
-                  borderRadius: "8px",
-                  color: "#6c757d",
-                  fontWeight: 600,
-                  "&:hover": {
-                    bgcolor: "#133e87",
-                  },
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleConfirmChangeStatus}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  bgcolor: "#133e87",
-                  color: "white",
-                  borderRadius: "8px",
-                  fontWeight: 600,
-                  "&:hover": {
-                    bgcolor: "#133e87",
-                    transform: "translateY(-1px)",
-                  },
-                  transition: "all 0.3s",
-                }}
-              >
-                Confirmar
-              </Button>
-            </Box>
+              Confirmar
+            </Button>
           </Box>
-        </Dialog>
-      </div>
+        </Box>
+      </Dialog>
+
+      {/* Modal para ver imagen */}
+      <Dialog open={openImageModal} onClose={handleCloseImageModal} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Imagen del edificio
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseImageModal}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <img
+            src={selectedImage}
+            alt="Imagen seleccionada"
+            style={{ width: "100%" }}
+          />
+        </DialogContent>
+      </Dialog>
 
       <ToastContainer />
     </>

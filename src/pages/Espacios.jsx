@@ -1,15 +1,8 @@
 import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import {
-  getEdificios,
-  chageStatus,
-  crearEdificio,
-  getEdificiosid,
-} from "../api/edificios";
-import {
-  getEspaciosEdificiosid
-} from "../api/espacios";
+import { getEspaciosEdificiosid } from "../api/espacios";
+import { getEdificios } from "../api/edificios";
 import {
   Table,
   TableBody,
@@ -40,7 +33,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 const Espacios = () => {
   // Estados para la tabla y búsqueda
-  const [edificio, setEdificio] = useState({  });
+  const [edificio, setEdificio] = useState(null);
   const [filteredEspacios, setFilteredEspacios] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -67,49 +60,55 @@ const Espacios = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
-  // const [idInventario,setidInventario] = useState(0);
-  // setidInventario(id);
 
-  console.log(id+ "id ")
   // Obtener edificio y sus espacios
   useEffect(() => {
-    if (!id) return;
-    
     const fetchEdificio = async () => {
       try {
+        const response = await getEdificios();
+        const edificioData = response.data.result.find((e) => e.id === parseInt(id));
+        setEdificio(edificioData);
+      } catch (error) {
+        console.error("Error al obtener el edificio:", error);
+      }
+    };
+
+    fetchEdificio();
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchEspacios = async () => {
+      try {
         const response = await getEspaciosEdificiosid(id);
-        console.log(response)
-        setEdificio(response.data.result);
-       
         setFilteredEspacios(response.data.result);
-        console.log(response.data)
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Error al cargar los datos del edificio");
       }
     };
 
-    fetchEdificio();
-    const interval = setInterval(fetchEdificio, 5000);
+    fetchEspacios();
+    const interval = setInterval(fetchEspacios, 5000);
 
     return () => clearInterval(interval);
   }, [id]);
 
-  console.log(edificio.espacio)
   // Filtrar espacios
   useEffect(() => {
     if (!edificio || !Array.isArray(edificio.espacios)) return;
-  
+
     let filtered = edificio.espacios.filter((espacio) =>
       espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (espacio) => espacio.status === (statusFilter === "active")
       );
     }
-    
+
     setFilteredEspacios(filtered);
   }, [searchQuery, statusFilter, edificio]);
 
@@ -173,7 +172,7 @@ const Espacios = () => {
       // Simulando una respuesta exitosa
       const response = {
         type: "SUCCESS",
-        text: "Espacio creado correctamente"
+        text: "Espacio creado correctamente",
       };
 
       if (response.type === "ERROR") {
@@ -221,19 +220,19 @@ const Espacios = () => {
       // Simulando una respuesta exitosa
       const response = {
         type: "SUCCESS",
-        text: "Estado cambiado correctamente"
+        text: "Estado cambiado correctamente",
       };
 
       if (response.type === "SUCCESS") {
         toast.success(response.text);
         // Actualizar el estado local
-        setEdificio(prev => ({
+        setEdificio((prev) => ({
           ...prev,
-          espacios: prev.espacios.map(esp => 
-            esp.id === selectedEspacio.id 
-              ? { ...esp, status: !esp.status } 
+          espacios: prev.espacios.map((esp) =>
+            esp.id === selectedEspacio.id
+              ? { ...esp, status: !esp.status }
               : esp
-          )
+          ),
         }));
       } else {
         toast.error(response.text || "Error al cambiar el estado");
@@ -379,7 +378,7 @@ const Espacios = () => {
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          {edificio.nombre} - Espacios
+          Espacios en {edificio?.nombre || "Cargando..."}
         </Typography>
         <Button
           variant="contained"
@@ -433,7 +432,7 @@ const Espacios = () => {
                   "Status",
                   "Fecha de creación",
                   "Editar",
-                  "Inventarios"
+                  "Inventarios",
                 ].map((header) => (
                   <TableCell
                     key={header}
@@ -450,13 +449,11 @@ const Espacios = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {console.log(filteredEspacios)}
               {filteredEspacios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((espacio) => (
                   <TableRow
                     key={espacio.id}
-
                     sx={{
                       "&:hover": { backgroundColor: "#f5f5f5" },
                       transition: "background-color 0.3s",
@@ -492,13 +489,14 @@ const Espacios = () => {
                       />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {new Date(
-                        espacio.fechaCreacion
-                      ).toLocaleDateString("es-ES", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {new Date(espacio.fechaCreacion).toLocaleDateString(
+                        "es-ES",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
@@ -507,14 +505,13 @@ const Espacios = () => {
                           color: "white",
                           borderRadius: "50%",
                           padding: "6px",
-                          // marginRight: "5px",
                         }}
                         onClick={() => handleOpenEditModal(espacio)}
                       >
                         <EditIcon />
                       </IconButton>
-                      </TableCell>
-                      <TableCell sx={{textAlign:"center"}}>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
                       <IconButton
                         sx={{
                           backgroundColor: "#133E87",
@@ -522,11 +519,15 @@ const Espacios = () => {
                           borderRadius: "50%",
                           padding: "6px",
                         }}
-                        onClick={() => navigate(`/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/gestion-inventarios/espacios/${id}/inventarios/${espacio.id}`
+                          )
+                        }
                       >
                         <ArrowForwardIcon />
                       </IconButton>
-                      </TableCell>
+                    </TableCell>
                   </TableRow>
                 ))}
             </TableBody>
@@ -673,7 +674,7 @@ const Espacios = () => {
                   }}
                   type="number"
                   min={1}
-                  max={edificio.numeroPisos || 10}
+                  max={edificio?.numeroPisos || 10}
                 />
               </Box>
 
@@ -1009,7 +1010,6 @@ const Espacios = () => {
             </Box>
           </Box>
         </Dialog>
-
       </div>
 
       {/* Contenedor de Toast */}
