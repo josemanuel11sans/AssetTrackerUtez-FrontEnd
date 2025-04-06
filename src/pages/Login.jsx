@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import "../styles/Login.css"; 
-import logo from "../assets/textLogo.png"
+import logo from "../assets/logoWithoutText.png"; // Asegúrate de que la ruta sea correcta
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -37,12 +37,13 @@ const Login = () => {
     <div className="login-container">
       <div className="login-box fixed-box">
         {/* Lado izquierdo: Imagen o ilustración */}
-        <div className="illustration">
-          <img src={logo} alt="Imagen de Asset Tracker UTEZ" className="illustration-img" />
-          <h1 className="title">Bienvenido AssetTracker UTEZ</h1>
+        <div className="illustrationLogin">
+          <img src={logo} alt="Imagen de Asset Tracker UTEZ" className="illustration-img2" />
+          <h1 className="titleIllustration">AssetTracker UTEZ</h1>
+          <p className="subtitleIllustration">Gestiona tus recursos eficientemente</p>
         </div>
         {/* Lado derecho: Formulario de login */}
-        <div className="form-container">
+        <div className="form-containerLogin">
           <h1 className="title2">Iniciar Sesión</h1>
           <p className="description">Bienvenido de nuevo, por favor complete los campos</p>
           <form className="login-form" onSubmit={handleSubmit}>
@@ -82,7 +83,7 @@ const Login = () => {
             <button type="submit" className="login-button">
               Entrar
             </button>
-            <div className="links">
+            {/*<div className="links">
               <p>
                 ¿Nuevo usuario?{" "}
                 <a
@@ -103,7 +104,7 @@ const Login = () => {
                   }}
                 >¿Olvidaste tu contraseña?
               </a>
-            </div>
+            </div>*/}
           </form>
         </div>
       </div>
