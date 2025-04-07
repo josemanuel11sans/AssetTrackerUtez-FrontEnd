@@ -380,14 +380,15 @@ const Recursos = () => {
         <Typography
           variant="h5"
           align="left"
+          marginLeft={5}
           color="#133e87"
           fontFamily={"sans-serif"}
           fontSize={30}
         >
-          {edificio.nombre} - Recursos
+          {edificio.nombre} Recursos
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
+          {/* <Button
             variant="contained"
             color="primary"
             onClick={handleAddSpace}
@@ -402,10 +403,11 @@ const Recursos = () => {
           >
             <AddIcon sx={{ marginRight: "8px" }} />
             Agregar Recurso
-          </Button>
+          </Button> */}
           <Button
             variant="outlined"
             color="primary"
+            // marginRight={5}
             onClick={handleGeneratePDF}
             sx={{
               display: "flex",
