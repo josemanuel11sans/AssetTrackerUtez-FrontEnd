@@ -66,7 +66,7 @@ const Login = () => {
                 <Lock className="icon" size={20} color="#aaa " />
                 <input 
                   type={showPassword ? "text" : "password"} 
-                  placeholder=". . . . . . ." 
+                  placeholder="• • • • • • • •" 
                   value={password}
                   onChange={handlePasswordChange}
                   required 
@@ -83,9 +83,9 @@ const Login = () => {
             <button type="submit" className="login-button">
               Entrar
             </button>
-            {/*<div className="links">
+            <div className="links">
               <p>
-                ¿Nuevo usuario?{" "}
+                ¿No tienes una cuenta?{" "}
                 <a
                   href="#"
                   onClick={(e) => {
@@ -93,18 +93,18 @@ const Login = () => {
                     navigate("/registro");
                   }}
                 >
-                  Crear una cuenta
+                  Regístrate
                 </a>
               </p>
-              <a
+              {/*<a
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
                     navigate("/recuperar-contrasena");
                   }}
                 >¿Olvidaste tu contraseña?
-              </a>
-            </div>*/}
+              </a>*/}
+            </div>
           </form>
         </div>
       </div>
