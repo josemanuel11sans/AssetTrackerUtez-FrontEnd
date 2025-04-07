@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { getCategoriasEspacios, chageStatus, saveCategoriaEspacio, updateCategoriaEspacio } from "../api/categoriasEspacios";
+import { getCategoriasEspacios, chageStatus } from "../api/categoriasEspacios";
 import {
   Table,
   TableBody,
@@ -33,8 +33,7 @@ const CategoriasEspacios = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active"); // Cambia el valor inicial a "active"
-  const [shouldReload, setShouldReload] = useState(true); // Estado para controlar la recarga
+  const [statusFilter, setStatusFilter] = useState("active");
 
   // Estados para el modal de agregar/editar categoría
   const [openModal, setOpenModal] = useState(false);
@@ -53,19 +52,22 @@ const CategoriasEspacios = () => {
       try {
         const response = await getCategoriasEspacios();
         const newData = response.data.result;
-        setCategorias(newData);
-        setFilteredCategorias(newData);
+
+        if (JSON.stringify(newData) !== JSON.stringify(categorias)) {
+          setCategorias(newData);
+          setFilteredCategorias(newData);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         toast.error("Error al cargar las categorías");
       }
     };
 
-    if (shouldReload || categorias.length === 0) { // Carga inicial o cuando se requiere recargar
-      fetchCategorias();
-      setShouldReload(false); // Restablece el estado después de recargar
-    }
-  }, [shouldReload, categorias.length]);
+    fetchCategorias();
+    const interval = setInterval(fetchCategorias, 30000);
+
+    return () => clearInterval(interval);
+  }, [categorias]);
 
   useEffect(() => {
     let filtered = categorias.filter((categoria) =>
@@ -128,7 +130,13 @@ const CategoriasEspacios = () => {
 
       if (response.type === "SUCCESS") {
         toast.success(response.text);
-        setShouldReload(true); // Marca que se debe recargar la tabla
+        setCategorias(
+          categorias.map((cat) =>
+            cat.id === selectedCategoria.id
+              ? { ...cat, estado: !cat.estado }
+              : cat
+          )
+        );
       } else {
         toast.error(response.text || "Error al cambiar el estado");
       }
@@ -147,20 +155,15 @@ const CategoriasEspacios = () => {
     setIsLoading(true);
 
     try {
-      if (currentCategoria) {
-        // Actualizar categoría existente
-        await updateCategoriaEspacio(currentCategoria.id, nombre, descripcion);
-        toast.success("Categoría actualizada correctamente");
-      } else {
-        // Guardar nueva categoría
-        await saveCategoriaEspacio(nombre, descripcion);
-        toast.success("Categoría creada correctamente");
-      }
-      setShouldReload(true); // Marca que se debe recargar la tabla
+      toast.success(
+        currentCategoria 
+          ? "Categoría actualizada correctamente" 
+          : "Categoría creada correctamente"
+      );
       handleCloseModal();
     } catch (error) {
-      toast.error("Error al guardar la categoría");
       console.error("Error:", error);
+      toast.error(error.response?.data?.message || "Error al procesar la solicitud");
     } finally {
       setIsLoading(false);
     }

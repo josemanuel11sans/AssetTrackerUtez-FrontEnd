@@ -12,10 +12,11 @@ export const getInventariosEspacios = async (id) => {
 
 export const saveInventario = async (formData) => {
   try {
+    console.log("formData", formData);
+    
     const response = await api.post(`${endpoint}/save`, formData, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`
       },
     });
     return response.data;
@@ -58,17 +59,3 @@ export const changeStatusInventario = async (id) => {
   }
 };
 
-export const getInventariosFiltrados = async (fecha, estado) => {
-  try {
-    const response = await api.get(`${endpoint}/filter`, {
-      params: { fecha, estado },
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error al obtener los inventarios filtrados:", error);
-    throw error;
-  }
-};

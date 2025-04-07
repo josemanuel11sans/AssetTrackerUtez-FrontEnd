@@ -1,12 +1,12 @@
-import { useParams } from "react-router-dom";;
+import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { jsPDF } from "jspdf";
 
-import {  autoTable  }  from  'jspdf-autotable'
-import {
-  getRecursosInventarioId
-} from "../api/recursos";
+import { autoTable } from "jspdf-autotable";
+import { getRecursosInventarioId } from "../api/recursos";
+import { getCategoriasRecursos } from "../api/caregoriasRecursos";
+import { getResponsables } from "../api/responsablesApi";
 import {
   Table,
   TableBody,
@@ -37,8 +37,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Navigate, useNavigate } from "react-router-dom";
 
 const Recursos = () => {
-  const [edificio, setEdificio] = useState({  });
+  const [edificio, setEdificio] = useState({});
   const [filteredEspacios, setFilteredEspacios] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [responsables, setResponsables] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,53 +50,88 @@ const Recursos = () => {
   const [selectedImage, setSelectedImage] = useState("");
 
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [numeroPlanta, setNumeroPlanta] = useState("");
-  const [file, setFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState("");
+  const [codigo, setCodigo] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [marca, setMarca] = useState("");
+  const [modelo, setModelo] = useState("");
+  const [numeroSerie, setNumeroSerie] = useState("");
+  const [observaciones, setObservaciones] = useState("");
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
+  const [responsableSeleccionado, setResponsableSeleccionado] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const { id } = useParams();
 
-  console.log(id+ "id ")
+  console.log(id + "id");
   useEffect(() => {
     if (!id) return;
-    
-    const fetchEdificio = async () => {
+
+    const fetchRecursos = async () => {
       try {
         const response = await getRecursosInventarioId(id);
-        console.log(response)
-        setEdificio(response.data.result);
-       
-        setFilteredEspacios(response.data.result);
-        console.log(response.data)
+        const recursosData = response?.result || []; // Ajustar para recibir datos directamente desde `result`
+        setEdificio({ espacios: recursosData }); // Asignar los recursos al estado `espacios`
+        setFilteredEspacios(recursosData);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Error al cargar los datos del edificio");
+        console.error("Error al obtener los recursos:", error);
+        toast.error("Error al cargar los recursos del inventario");
       }
     };
 
-    fetchEdificio();
-    const interval = setInterval(fetchEdificio, 5000);
+    fetchRecursos();
+    const interval = setInterval(fetchRecursos, 5000);
 
     return () => clearInterval(interval);
   }, [id]);
 
-  console.log(edificio.espacio)
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        console.log("Iniciando la carga de categorías...");
+        const response = await getCategoriasRecursos(); // Consume /categoriaRecurso/all
+        console.log("Respuesta de categorías:", response);
+        const categoriasActivas = response.filter((cat) => cat.status === true);
+        console.log("Categorías activas filtradas:", categoriasActivas);
+        setCategorias(categoriasActivas);
+      } catch (error) {
+        console.error("Error al cargar las categorías:", error);
+      }
+    };
+
+    const fetchResponsables = async () => {
+      try {
+        console.log("Iniciando la carga de responsables...");
+        const response = await getResponsables(); // Consume /responsables/all
+        console.log("Respuesta de responsables:", response);
+        const responsablesActivos = response.result.filter(
+          (res) => res.estado === true
+        );
+        console.log("Responsables activos filtrados:", responsablesActivos);
+        console.log("Responsables activos filtrados:", responsablesActivos);
+        setResponsables(responsablesActivos);
+      } catch (error) {
+        console.error("Error al cargar los responsables:", error);
+      }
+    };
+
+    fetchCategorias();
+    fetchResponsables();
+  }, []);
+
   useEffect(() => {
     if (!edificio || !Array.isArray(edificio.espacios)) return;
-  
+
     let filtered = edificio.espacios.filter((espacio) =>
-      espacio.nombre.toLowerCase().includes(searchQuery.toLowerCase())
+      espacio.descripcion.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (espacio) => espacio.status === (statusFilter === "active")
       );
     }
-    
+
     setFilteredEspacios(filtered);
   }, [searchQuery, statusFilter, edificio]);
 
@@ -127,43 +164,41 @@ const Recursos = () => {
   };
 
   const resetForm = () => {
-    setNombre("");
-    setNumeroPlanta("");
-    setFile(null);
-    setPreviewImage("");
+    setCodigo("");
+    setDescripcion("");
+    setMarca("");
+    setModelo("");
+    setNumeroSerie("");
+    setObservaciones("");
+    setCategoriaSeleccionada("");
+    setResponsableSeleccionado("");
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setPreviewImage(URL.createObjectURL(selectedFile));
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleAddResource = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
+    const payload = {
+      codigo,
+      descripcion,
+      marca,
+      modelo,
+      numeroSerie,
+      observaciones,
+      invetarioLevantadoid: parseInt(id),
+      categoriaRecursoid: parseInt(categoriaSeleccionada),
+      responsableid: parseInt(responsableSeleccionado),
+    };
+
     try {
-      const response = {
-        type: "SUCCESS",
-        text: "Espacio creado correctamente"
-      };
-
-      if (response.type === "ERROR") {
-        toast.error(response.text);
-      } else if (response.type === "SUCCESS") {
-        toast.success(response.text);
-      } else if (response.type === "WARNING") {
-        toast.warning(response.text);
-      }
-
+      // Call the API to save the resource (replace with actual API call)
+      console.log("Payload:", payload);
+      toast.success("Recurso agregado correctamente");
       setOpenAddModal(false);
       resetForm();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error al crear espacio");
-      console.error("Error al crear espacio:", error);
+      toast.error("Error al agregar el recurso");
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -188,18 +223,18 @@ const Recursos = () => {
 
       const response = {
         type: "SUCCESS",
-        text: "Estado cambiado correctamente"
+        text: "Estado cambiado correctamente",
       };
 
       if (response.type === "SUCCESS") {
         toast.success(response.text);
-        setEdificio(prev => ({
+        setEdificio((prev) => ({
           ...prev,
-          espacios: prev.espacios.map(esp => 
-            esp.id === selectedEspacio.id 
-              ? { ...esp, status: !esp.status } 
+          espacios: prev.espacios.map((esp) =>
+            esp.id === selectedEspacio.id
+              ? { ...esp, status: !esp.status }
               : esp
-          )
+          ),
         }));
       } else {
         toast.error(response.text || "Error al cambiar el estado");
@@ -208,11 +243,13 @@ const Recursos = () => {
       handleCloseStatusModal();
     } catch (error) {
       console.error("Error al cambiar el estado:", error);
-      toast.error(error.response?.data?.message || "Error al cambiar el estado");
+      toast.error(
+        error.response?.data?.message || "Error al cambiar el estado"
+      );
       handleCloseStatusModal();
     }
   };
- 
+
   const handleGeneratePDF = () => {
     const doc = new jsPDF();
     // const  = "../assets/logo.png"; // Ruta del logo
@@ -223,7 +260,14 @@ const Recursos = () => {
     const marginRight = 10; // Margen derecho
     const marginTop = 10; // Margen superior
 
-    doc.addImage(logoUrl, "PNG", doc.internal.pageSize.width - imgWidth - marginRight, marginTop, imgWidth, imgHeight);
+    doc.addImage(
+      logoUrl,
+      "PNG",
+      doc.internal.pageSize.width - imgWidth - marginRight,
+      marginTop,
+      imgWidth,
+      imgHeight
+    );
 
     // Título del reporte
     doc.text("Reporte de Recursos", 14, 20);
@@ -231,7 +275,18 @@ const Recursos = () => {
     // Generar tabla
     autoTable(doc, {
       startY: 40,
-      head: [["#", "Código", "Descripción", "Marca", "Modelo", "Num Serie", "Observaciones", "Estado"]],
+      head: [
+        [
+          "#",
+          "Código",
+          "Descripción",
+          "Marca",
+          "Modelo",
+          "Num Serie",
+          "Observaciones",
+          "Estado",
+        ],
+      ],
       body: filteredEspacios.map((espacio, index) => [
         index + 1,
         espacio.codigo,
@@ -399,8 +454,10 @@ const Recursos = () => {
                   "Modelo",
                   "Num Serie",
                   "Observaciones",
+                  "Categoría",
+                  "Responsable",
                   "Status",
-                "Editar"
+                  "Editar",
                 ].map((header) => (
                   <TableCell
                     key={header}
@@ -417,64 +474,85 @@ const Recursos = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {console.log(filteredEspacios)}
               {filteredEspacios
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((espacio) => (
-                  <TableRow
-                    key={espacio.id}
+                .map((espacio, index) => {
+                  console.log("Procesando espacio:", espacio.responsable?.id);
 
-                    sx={{
-                      "&:hover": { backgroundColor: "#f5f5f5" },
-                      transition: "background-color 0.3s",
-                    }}
-                  >
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.id}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                        {espacio.codigo}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.descripcion}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.marca}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.modelo}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.numeroSerie}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      {espacio.observaciones}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Chip
-                        label={espacio.status ? "Activo" : "Inactivo"}
-                        color={espacio.status ? "success" : "default"}
-                        size="small"
-                        onClick={() => handleOpenStatusModal(espacio)}
-                        style={{ cursor: "pointer" }}
-                      />
-                    </TableCell>
-                    
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <IconButton
-                        sx={{
-                          backgroundColor: "#133E87",
-                          color: "white",
-                          borderRadius: "50%",
-                          padding: "6px",
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
+                  // Obtener la categoría asociada
+                  const categoria = Array.isArray(categorias)
+                    ? categorias.find(
+                        (cat) => cat.id === espacio.categoriaRecurso?.id
+                      )
+                    : null;
+
+                  // Obtener el responsable asociado
+                  const responsable = Array.isArray(responsables)
+                    ? responsables.find((res) => res.id === espacio.responsable?.id)
+                    : null;
+
+                  console.log("Categoría asociada:", categoria?.nombre || "Sin categoría");
+                  console.log("Responsable asociado:", responsables?.nombre || "Sin responsable");
+
+                  return (
+                    <TableRow
+                      key={espacio.codigo}
+                      sx={{
+                        "&:hover": { backgroundColor: "#f5f5f5" },
+                        transition: "background-color 0.3s",
+                      }}
+                    >
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {page * rowsPerPage + index + 1}
                       </TableCell>
-                      
-                  </TableRow>
-                ))}
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.codigo}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.descripcion}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.marca}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.modelo}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.numeroSerie}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {espacio.observaciones}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {categoria?.nombre || "Sin categoría"}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        {responsable?.nombre || "Sin responsable"}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <Chip
+                          label={espacio.status ? "Activo" : "Inactivo"}
+                          color={espacio.status ? "success" : "default"}
+                          size="small"
+                          onClick={() => handleOpenStatusModal(espacio)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <IconButton
+                          sx={{
+                            backgroundColor: "#133E87",
+                            color: "white",
+                            borderRadius: "50%",
+                            padding: "6px",
+                          }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
             </TableBody>
           </Table>
           <TablePagination
@@ -563,7 +641,7 @@ const Recursos = () => {
           </Box>
 
           <Box sx={{ p: 3 }}>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <Box component="form" onSubmit={handleAddResource} sx={{ mt: 1 }}>
               <Box sx={{ mb: 3 }}>
                 <label
                   style={{
@@ -574,12 +652,12 @@ const Recursos = () => {
                     fontSize: "1.1rem",
                   }}
                 >
-                  Nombre del recurso *
+                  Código *
                 </label>
                 <input
                   required
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value)}
                   style={{
                     width: "100%",
                     padding: "14px",
@@ -590,14 +668,208 @@ const Recursos = () => {
                   }}
                 />
               </Box>
-
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Descripción *
+                </label>
+                <input
+                  required
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Marca *
+                </label>
+                <input
+                  required
+                  value={marca}
+                  onChange={(e) => setMarca(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Modelo *
+                </label>
+                <input
+                  required
+                  value={modelo}
+                  onChange={(e) => setModelo(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Número de Serie *
+                </label>
+                <input
+                  required
+                  value={numeroSerie}
+                  onChange={(e) => setNumeroSerie(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Observaciones
+                </label>
+                <textarea
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                />
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Categoría *
+                </label>
+                <select
+                  required
+                  value={categoriaSeleccionada}
+                  onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  <option value="">Seleccione una categoría</option>
+                  {categorias.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.nombre}
+                    </option>
+                  ))}
+                </select>
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Responsable *
+                </label>
+                <select
+                  required
+                  value={responsableSeleccionado}
+                  onChange={(e) => setResponsableSeleccionado(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  <option value="">Seleccione un responsable</option>
+                  {responsables.map((res) => (
+                    <option key={res.id} value={res.id}>
+                      {res.nombre}
+                    </option>
+                  ))}
+                </select>
+              </Box>
               <button
                 type="submit"
                 disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "16px",
-                  backgroundColor: isLoading ? "#133e87" : "#133e87",
+                  backgroundColor: "#133e87",
                   color: "white",
                   border: "none",
                   borderRadius: "10px",

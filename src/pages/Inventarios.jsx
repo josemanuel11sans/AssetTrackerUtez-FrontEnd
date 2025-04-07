@@ -23,7 +23,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { getInventariosEspacios, saveInventario, changeStatusInventario } from "../api/inventarios";
+import EditIcon from "@mui/icons-material/Edit";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { getInventariosEspacios, saveInventario, changeStatusInventario, updateInventario } from "../api/inventarios";
 
 const Inventarios = () => {
   const { id } = useParams();
@@ -41,6 +43,12 @@ const Inventarios = () => {
   const [selectedInventario, setSelectedInventario] = useState(null);
   const [fechaFiltro, setFechaFiltro] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("all");
+  const [open, setOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editFile, setEditFile] = useState(null);
+  const [editPreviewImage, setEditPreviewImage] = useState("");
+  const [editInventario, setEditInventario] = useState(null);
 
   const formatFecha = (fecha) => {
     const opciones = { day: "numeric", month: "long", year: "numeric" };
@@ -52,7 +60,6 @@ const Inventarios = () => {
       const response = await getInventariosEspacios(id);
       const inventariosData = response.data.result;
 
-      // Filtrar inventarios por fecha y estado
       let filtered = inventariosData;
 
       if (fechaFiltro) {
@@ -88,10 +95,16 @@ const Inventarios = () => {
     setPage(0);
   };
 
-  const handleAddInventario = () => {
-    setOpenAddModal(true);
-    setFile(null);
-    setPreviewImage("");
+  const handleAddInventario = async () => {
+    try {
+      const payload = { espacio: id };
+      await saveInventario(payload);
+      toast.success("Inventario creado correctamente");
+      await fetchInventarios();
+    } catch (error) {
+      toast.error("Error al crear el inventario");
+      console.error("Error:", error);
+    }
   };
 
   const handleCloseAddModal = () => {
@@ -112,15 +125,12 @@ const Inventarios = () => {
 
     try {
       const formData = new FormData();
-      formData.append("id", id);
-      if (file) {
-        formData.append("file", file);
-      }
+      formData.append("espacio", id);
 
       await saveInventario(formData);
       toast.success("Inventario creado correctamente");
       setOpenAddModal(false);
-      await fetchInventarios(); // Recargar la tabla tras guardar
+      await fetchInventarios();
     } catch (error) {
       toast.error("Error al crear el inventario");
       console.error("Error:", error);
@@ -143,10 +153,69 @@ const Inventarios = () => {
     try {
       await changeStatusInventario(selectedInventario.id);
       toast.success("Estado del inventario actualizado correctamente");
-      await fetchInventarios(); // Recargar la tabla tras cambiar el estado
+      await fetchInventarios();
       handleCloseStatusModal();
     } catch (error) {
       toast.error("Error al cambiar el estado del inventario");
+      console.error("Error:", error);
+    }
+  };
+
+  const handleClickOpen = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedImage("");
+  };
+
+  const handleEditInventario = (inventario) => {
+    setEditInventario(inventario);
+    setEditPreviewImage(inventario.imagenUrl || "");
+    setEditFile(null);
+    setOpenEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setOpenEditModal(false);
+    setEditInventario(null);
+    setEditFile(null);
+    setEditPreviewImage("");
+  };
+
+  const handleEditFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setEditFile(selectedFile);
+      setEditPreviewImage(URL.createObjectURL(selectedFile));
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editFile || !editInventario) {
+      toast.error("Debe seleccionar una imagen para actualizar.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      
+      
+      formData.append("id", editInventario.id);
+      console.log("editInventario.id", editInventario.id);
+      
+      formData.append("file", editFile);
+      console.log("editFile", editFile);
+      
+      await updateInventario(formData);
+      toast.success("Imagen del inventario actualizada correctamente");
+      setOpenEditModal(false);
+      await fetchInventarios();
+    } catch (error) {
+      toast.error("Error al actualizar la imagen del inventario");
       console.error("Error:", error);
     }
   };
@@ -270,7 +339,7 @@ const Inventarios = () => {
           <Table size="small">
             <TableHead>
               <TableRow sx={{ backgroundColor: "#133e87", zIndex: 1 }}>
-                {["#", "Imagen", "Fecha de Creación", "Estado", "Acciones"].map((header) => (
+                {["#", "Imagen", "Fecha de Creación", "Estado", "Ver Recursos", "Editar"].map((header) => (
                   <TableCell
                     key={header}
                     sx={{
@@ -310,6 +379,7 @@ const Inventarios = () => {
                           objectFit: "cover",
                           cursor: "pointer",
                         }}
+                        onClick={() => handleClickOpen(inventario.imagenUrl)}
                       />
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
@@ -333,10 +403,23 @@ const Inventarios = () => {
                           padding: "6px",
                         }}
                         onClick={() =>
-                          navigate(`/gestion-inventarios/espacios/${id}/inventarios/${inventario.id}/recursos`)
+                          navigate(`/gestion-inventarios/espacios/${id}/inventarios/${id}/recursos/${inventario.id}`)
                         }
                       >
                         <ArrowForwardIcon />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <IconButton
+                        sx={{
+                          backgroundColor: "#133E87",
+                          color: "white",
+                          borderRadius: "50%",
+                          padding: "6px",
+                        }}
+                        onClick={() => handleEditInventario(inventario)}
+                      >
+                        <EditIcon />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -355,7 +438,6 @@ const Inventarios = () => {
         </TableContainer>
       </div>
 
-      {/* Modal para agregar inventario */}
       <Dialog
         open={openAddModal}
         onClose={handleCloseAddModal}
@@ -488,7 +570,6 @@ const Inventarios = () => {
         </Box>
       </Dialog>
 
-      {/* Modal para confirmar cambio de estado */}
       <Dialog
         open={openStatusModal}
         onClose={handleCloseStatusModal}
@@ -597,6 +678,155 @@ const Inventarios = () => {
             </Button>
           </Box>
         </Box>
+      </Dialog>
+
+      <Dialog
+        open={openEditModal}
+        onClose={handleCloseEditModal}
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.1)",
+            width: "90%",
+            maxWidth: "500px",
+            minWidth: "400px",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            bgcolor: "#f8f9fa",
+            p: 3,
+            borderBottom: "2px solid #e9ecef",
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: "#2b2d42",
+              textAlign: "center",
+              fontSize: "1.6rem",
+            }}
+          >
+            Editar Imagen del Inventario
+          </Typography>
+
+          <IconButton
+            onClick={handleCloseEditModal}
+            sx={{
+              position: "absolute",
+              right: 16,
+              top: 16,
+              color: "#133e87",
+              "&:hover": {
+                bgcolor: "#dee2e6",
+              },
+            }}
+          >
+            <CloseIcon sx={{ fontSize: "1.5rem" }} />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ p: 3 }}>
+          <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 1 }}>
+            <Box sx={{ mb: 3 }}>
+              <input
+                accept="image/*"
+                id="edit-file-input"
+                type="file"
+                name="file"
+                onChange={handleEditFileChange}
+                style={{ display: "none" }}
+              />
+              <label htmlFor="edit-file-input">
+                <Box
+                  sx={{
+                    border: "2px dashed #ced4da",
+                    borderRadius: "10px",
+                    p: 4,
+                    textAlign: "center",
+                    cursor: "pointer",
+                    transition: "all 0.3s",
+                    "&:hover": {
+                      borderColor: "#133e87",
+                      backgroundColor: "#f8f0ff",
+                    },
+                  }}
+                >
+                  <CloudUploadIcon
+                    sx={{
+                      color: "#133e87",
+                      fontSize: "2.5rem",
+                      mb: 2,
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#6c757d",
+                      fontWeight: 500,
+                      fontSize: "1.1rem",
+                    }}
+                  >
+                    Arrastra o haz clic para subir una imagen
+                  </Typography>
+                </Box>
+              </label>
+            </Box>
+
+            {editPreviewImage && (
+              <Box
+                sx={{
+                  mb: 3,
+                  border: "2px solid #e9ecef",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={editPreviewImage}
+                  alt="Vista previa"
+                  style={{
+                    width: "100%",
+                    height: "250px",
+                    objectFit: "cover",
+                  }}
+                />
+              </Box>
+            )}
+
+            <button
+              type="submit"
+              style={{
+                width: "100%",
+                padding: "16px",
+                backgroundColor: "#133e87",
+                color: "white",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "1.1rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.3s",
+              }}
+            >
+              Guardar Cambios
+            </button>
+          </Box>
+        </Box>
+      </Dialog>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Imagen del Inventario</DialogTitle>
+        <DialogContent>
+          <img
+            src={selectedImage}
+            alt="Inventario"
+            style={{ width: "100%", height: "auto" }}
+          />
+        </DialogContent>
       </Dialog>
 
       <ToastContainer />

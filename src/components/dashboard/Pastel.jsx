@@ -1,25 +1,41 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Paper, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
-import { FaChartPie, FaExpand } from "react-icons/fa" // Íconos de gráfico de pastel y pantalla completa
+import { FaChartPie, FaExpand } from "react-icons/fa"
 import { PieChart as RePieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts"
+import { getUsuarios } from "../../api/usuariosApi"
 
-const resourceTypeData = [
-  { name: "Equipo de cómputo", value: 45 },
-  { name: "Mobiliario", value: 30 },
-  { name: "Equipo audiovisual", value: 15 },
-  { name: "Equipo de oficina", value: 10 },
-]
-
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#133e87", "#8884d8"]
+const COLORS = ["#0088FE", "#FF8042"]
 
 const Pastel = () => {
-  const [openModal, setOpenModal] = useState(false) // Controlar si el modal está abierto o cerrado
+  const [openModal, setOpenModal] = useState(false)
+  const [userData, setUserData] = useState([])
 
   const handleToggleModal = () => {
-    setOpenModal(!openModal) // Cambiar el estado del modal
+    setOpenModal(!openModal)
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getUsuarios()
+        const usuarios = response.data.result
+
+        const adminCount = usuarios.filter(user => user.rol === "ROLE_ADMIN_ACCESS").length
+        const inspectorCount = usuarios.filter(user => user.rol === "ROLE_INSPECTOR_ACCESS").length
+
+        setUserData([
+          { name: "Administradores", value: adminCount },
+          { name: "Inspectores", value: inspectorCount },
+        ])
+      } catch (error) {
+        console.error("Error al obtener los datos del gráfico:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <>
@@ -42,16 +58,15 @@ const Pastel = () => {
         >
           <div style={{ display: "flex", alignItems: "center" }}>
             <FaChartPie size={20} style={{ marginRight: "8px" }} />
-            Recursos por Categoría
+            Usuarios por Rol
           </div>
-          <FaExpand size={20} style={{ cursor: "pointer" }} onClick={handleToggleModal} />{" "}
-          {/* Ícono para maximizar el gráfico */}
+          <FaExpand size={20} style={{ cursor: "pointer" }} onClick={handleToggleModal} />
         </Typography>
 
         <ResponsiveContainer width="100%" height={300}>
           <RePieChart>
             <Pie
-              data={resourceTypeData}
+              data={userData}
               cx="50%"
               cy="50%"
               labelLine={false}
@@ -60,7 +75,7 @@ const Pastel = () => {
               fill="#8884d8"
               dataKey="value"
             >
-              {resourceTypeData.map((entry, index) => (
+              {userData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
@@ -69,7 +84,6 @@ const Pastel = () => {
         </ResponsiveContainer>
       </Paper>
 
-      {/* Modal de Pantalla Completa */}
       <Dialog
         open={openModal}
         onClose={handleToggleModal}
@@ -77,12 +91,12 @@ const Pastel = () => {
         maxWidth="false"
         sx={{ "& .MuiDialog-paper": { height: "100%", width: "100%" } }}
       >
-        <DialogTitle>Recursos por Categoría</DialogTitle>
+        <DialogTitle>Usuarios por Rol</DialogTitle>
         <DialogContent sx={{ padding: 0, height: "100%" }}>
           <ResponsiveContainer width="100%" height="100%">
             <RePieChart>
               <Pie
-                data={resourceTypeData}
+                data={userData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -91,7 +105,7 @@ const Pastel = () => {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {resourceTypeData.map((entry, index) => (
+                {userData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
