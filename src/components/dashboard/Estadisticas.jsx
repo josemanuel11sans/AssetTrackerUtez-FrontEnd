@@ -17,7 +17,7 @@ const Estadisticas = () => {
   const [espacios, setEspacios] = useState(0);
   const [recursos, setRecursos] = useState(0);
   const [inventarios, setInventarios] = useState(0);
-
+  console.log(espacios, edificios, recursos, inventarios);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -29,7 +29,7 @@ const Estadisticas = () => {
         ]);
 
         setEdificios(edificiosRes.data);
-        setEspacios(espaciosRes.data);
+        setEspacios(espaciosRes);
         setRecursos(recursosRes.data);
         setInventarios(inventariosRes.data);
       } catch (error) {
@@ -40,9 +40,11 @@ const Estadisticas = () => {
     fetchData();
   }, []);
 
+  console.log(contarEspacios());
+  
   const stats = [
     { title: 'Edificios', value: edificios, icon: <FaBuilding size={24} />, color: theme.palette.primary.main },
-    { title: 'Espacios', value: espacios, icon: <FaLayerGroup size={24} />, color: theme.palette.secondary.main },
+    { title: 'Espacios', value: contarEspacios(), icon: <FaLayerGroup size={24} />, color: theme.palette.secondary.main },
     { title: 'Recursos', value: recursos, icon: <FaCogs size={24} />, color: theme.palette.success.main },
     { title: 'Inventarios', value: inventarios, icon: <FaClipboardList size={24} />, color: theme.palette.warning.main },
   ];
@@ -64,6 +66,7 @@ const Estadisticas = () => {
                   borderRadius: '50%',
                 }}
               >
+                
                 {React.cloneElement(stat.icon, { color: stat.color })}
               </Box>
               <Box>

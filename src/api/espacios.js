@@ -16,7 +16,7 @@ export const getEspaciosEdificiosid = async (id) => {
     return await api.get(`${endpoint}/edificio/${id}`);
 };
 
-export const saveEspacio = async (nombre, numeroPlanta, file, idEdificio) => {
+export const saveEspacio = async (nombre, numeroPlanta, file, idEdificio, espacio) => {
     try {
         const formData = new FormData();
         formData.append("nombre", nombre);
@@ -25,6 +25,7 @@ export const saveEspacio = async (nombre, numeroPlanta, file, idEdificio) => {
         if (file) {
             formData.append("file", file);
         }
+        formData.append("categoriaEspacio", espacio);
 
         const response = await api.post(`${endpoint}/save`, formData, {
             headers: {
@@ -39,7 +40,7 @@ export const saveEspacio = async (nombre, numeroPlanta, file, idEdificio) => {
     }
 };
 
-export const updateEspacio = async (id, nombre, numeroPlanta, file) => {
+export const updateEspacio = async (id, nombre, numeroPlanta, file, idCategoriaEspacio) => {
     try {
         const formData = new FormData();
         formData.append("id", id);
@@ -48,7 +49,9 @@ export const updateEspacio = async (id, nombre, numeroPlanta, file) => {
         if (file) {
             formData.append("file", file);
         }
-
+        formData.append("categoriaEspacio", idCategoriaEspacio); // Enviar el ID de la categoría seleccionada
+       
+        
         const response = await api.put(`${endpoint}/update`, formData, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("jwt")}`,

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { getEspaciosEdificiosid, saveEspacio, updateEspacio, changeStatusEspacio } from "../api/espacios";
 import { getEdificios } from "../api/edificios";
+import { getCategoriasEspacios } from "../api/categoriasEspacios";
 import {
   Table,
   TableBody,
@@ -51,6 +52,7 @@ const Espacios = () => {
   const [file, setFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
 
   // Estados para el modal de edición de espacio
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -60,6 +62,9 @@ const Espacios = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Estados para las categorías
+  const [categorias, setCategorias] = useState([]);
 
   // Obtener edificio y sus espacios
   useEffect(() => {
@@ -94,6 +99,20 @@ const Espacios = () => {
 
     return () => clearInterval(interval);
   }, [id]);
+
+  useEffect(() => {
+    const fetchCategorias = async () => {
+      try {
+        const response = await getCategoriasEspacios();
+        const categoriasActivas = response.data.result.filter((cat) => cat.estado === true);
+        setCategorias(categoriasActivas);
+      } catch (error) {
+        console.error("Error al cargar las categorías:", error);
+      }
+    };
+
+    fetchCategorias();
+  }, []);
 
   // Filtrar espacios
   useEffect(() => {
@@ -148,6 +167,7 @@ const Espacios = () => {
     setNumeroPlanta("");
     setFile(null);
     setPreviewImage("");
+    setCategoriaSeleccionada("");
   };
 
   // Manejar selección de archivo
@@ -163,15 +183,18 @@ const Espacios = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+    
     try {
       if (editEspacio) {
         // Actualizar espacio existente
-        await updateEspacio(editEspacio.id, nombre, numeroPlanta, file, id);
+       
+        
+        await updateEspacio(editEspacio.id, nombre, numeroPlanta, file, id, categoriaSeleccionada);
+        console.log("Espacio actualizado:", editEspacio.id, nombre, numeroPlanta, file, id, categoriaSeleccionada);
         toast.success("Espacio actualizado correctamente");
       } else {
         // Crear nuevo espacio
-        await saveEspacio(nombre, numeroPlanta, file, id);
+        await saveEspacio(nombre, numeroPlanta, file, id, categoriaSeleccionada);
         toast.success("Espacio creado correctamente");
       }
       setOpenAddModal(false);
@@ -236,10 +259,11 @@ const Espacios = () => {
     setEditEspacio(espacio);
     setEditNombre(espacio.nombre);
     setEditNumeroPlanta(espacio.numeroPlanta);
+    setCategoriaSeleccionada(espacio.categoriaEspacio?.id); // Establecer la categoría seleccionada
     setPreviewImage(espacio.urlImagen || ""); // Muestra la imagen actual como vista previa
     setOpenEditModal(true);
   };
-
+  
   // Función para cerrar el modal de edición
   const handleCloseEditModal = () => {
     setOpenEditModal(false);
@@ -254,13 +278,13 @@ const Espacios = () => {
     setIsLoading(true);
 
     try {
-      await updateEspacio(editEspacio.id, editNombre, editNumeroPlanta, file, id);
+      await updateEspacio(editEspacio.id, editNombre, editNumeroPlanta, file, categoriaSeleccionada); // Enviar el ID correcto de la categoría seleccionada
       toast.success("Espacio actualizado correctamente");
 
       setFilteredEspacios((prev) =>
         prev.map((esp) =>
           esp.id === editEspacio.id
-            ? { ...esp, nombre: editNombre, numeroPlanta: editNumeroPlanta, urlImagen: previewImage }
+            ? { ...esp, nombre: editNombre, numeroPlanta: editNumeroPlanta, urlImagen: previewImage, categoriaEspacio: { id: categoriaSeleccionada } }
             : esp
         )
       );
@@ -272,6 +296,11 @@ const Espacios = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getCategoriaNombre = (categoriaId) => {
+    const categoria = categorias.find((cat) => cat.id === categoriaId);
+    return categoria ? categoria.nombre : "Sin categoría";
   };
 
   return (
@@ -408,6 +437,7 @@ const Espacios = () => {
                   "#",
                   "Nombre",
                   "Planta",
+                  "Categoría",
                   "Imagen",
                   "Status",
                   "Fecha de creación",
@@ -443,6 +473,10 @@ const Espacios = () => {
                       <TableCell sx={{ textAlign: "center" }}>{espacio.id}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{espacio.nombre}</TableCell>
                       <TableCell sx={{ textAlign: "center" }}>{espacio.numeroPlanta}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        
+                        {getCategoriaNombre(espacio.categoriaEspacio?.id)}
+                      </TableCell>
                       <TableCell sx={{ textAlign: "center" }}>
                         {espacio.urlImagen && (
                           <img
@@ -649,6 +683,42 @@ const Espacios = () => {
               </Box>
 
               <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Categoría del espacio *
+                </label>
+                <select
+                  required
+                  value={categoriaSeleccionada}
+                  onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  <option value="" disabled>
+                    Seleccione una categoría
+                  </option>
+                  {categorias.map((categoria) => (
+                    <option key={categoria.id} value={categoria.id}>
+                      {categoria.nombre}
+                    </option>
+                  ))}
+                </select>
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
                 <input
                   accept="image/*"
                   id="contained-button-file"
@@ -841,6 +911,42 @@ const Espacios = () => {
                   }}
                   type="number"
                 />
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "12px",
+                    color: "#133e87",
+                    fontWeight: 500,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Categoría del espacio *
+                </label>
+                <select
+                  required
+                  value={categoriaSeleccionada}
+                  onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    borderRadius: "10px",
+                    border: "2px solid #ced4da",
+                    fontSize: "1rem",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  <option value="" disabled>
+                    Seleccione una categoría
+                  </option>
+                  {categorias.map((categoria) => (
+                    <option key={categoria.id} value={categoria.id}>
+                      {categoria.nombre}
+                    </option>
+                  ))}
+                </select>
               </Box>
 
               <Box sx={{ mb: 3 }}>

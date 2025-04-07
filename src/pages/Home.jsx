@@ -28,7 +28,9 @@ const Home = () => {
   const [espaciosCount, setEspaciosCount] = useState(0)
   const [recursosCount, setRecursosCount] = useState(0)
   const [inventariosCount, setInventariosCount] = useState(0)
-
+   
+    
+    
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -38,9 +40,10 @@ const Home = () => {
           contarRecursos(),
           contarInventarios(),
         ])
-
+      console.log(espaciosRes);
+      
         setEdificiosCount(edificiosRes.data)
-        setEspaciosCount(espaciosRes.data)
+        setEspaciosCount(espaciosRes)
         setRecursosCount(recursosRes.data)
         setInventariosCount(inventariosRes.data)
       } catch (error) {

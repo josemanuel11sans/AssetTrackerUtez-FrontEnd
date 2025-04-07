@@ -24,7 +24,8 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
-import { getEdificios, saveInventario, updateInventario, changeStatusEdificio } from "../api/edificios";
+import { getEdificios, updateInventario, changeStatusEdificio } from "../api/edificios";
+import { saveInventario } from "../api/inventarios";
 
 const GestionInventarios = () => {
   const navigate = useNavigate();
